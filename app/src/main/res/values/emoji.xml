@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="currency_emoji_aud" translatable="false">🇦🇺</string>
+  <string name="currency_emoji_bgn" translatable="false">🇧🇬</string>
+  <string name="currency_emoji_brl" translatable="false">🇧🇷</string>
+  <string name="currency_emoji_cad" translatable="false">🇨🇦</string>
+  <string name="currency_emoji_chf" translatable="false">🇨🇭</string>
+  <string name="currency_emoji_cny" translatable="false">🇨🇳</string>
+  <string name="currency_emoji_czk" translatable="false">🇨🇿</string>
+  <string name="currency_emoji_dkk" translatable="false">🇩🇰</string>
+  <string name="currency_emoji_eur" translatable="false">🇪🇺</string>
+  <string name="currency_emoji_gbp" translatable="false">🇬🇧</string>
+  <string name="currency_emoji_hkd" translatable="false">🇭🇰</string>
+  <string name="currency_emoji_hrk" translatable="false">🇭🇷</string>
+  <string name="currency_emoji_huf" translatable="false">🇭🇺</string>
+  <string name="currency_emoji_idr" translatable="false">🇮🇩</string>
+  <string name="currency_emoji_ils" translatable="false">🇮🇱</string>
+  <string name="currency_emoji_inr" translatable="false">🇮🇳</string>
+  <string name="currency_emoji_isk" translatable="false">🇮🇸</string>
+  <string name="currency_emoji_jpy" translatable="false">🇯🇵</string>
+  <string name="currency_emoji_krw" translatable="false">🇰🇷</string>
+  <string name="currency_emoji_mxn" translatable="false">🇲🇽</string>
+  <string name="currency_emoji_myr" translatable="false">🇲🇾</string>
+  <string name="currency_emoji_nok" translatable="false">🇳🇴</string>
+  <string name="currency_emoji_nzd" translatable="false">🇳🇿</string>
+  <string name="currency_emoji_php" translatable="false">🇵🇭</string>
+  <string name="currency_emoji_pln" translatable="false">🇵🇱</string>
+  <string name="currency_emoji_ron" translatable="false">🇷🇴</string>
+  <string name="currency_emoji_rub" translatable="false">🇷🇺</string>
+  <string name="currency_emoji_sek" translatable="false">🇸🇪</string>
+  <string name="currency_emoji_sgd" translatable="false">🇸🇬</string>
+  <string name="currency_emoji_thb" translatable="false">🇹🇭</string>
+  <string name="currency_emoji_usd" translatable="false">🇺🇸</string>
+  <string name="currency_emoji_zar" translatable="false">🇿🇦</string>
+</resources>

@@ -1,34 +1,95 @@
 apply plugin: 'com.android.application'
 
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
+
     defaultConfig {
         applicationId "dev.dnihze.revorate"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+}
+
+kapt {
+    arguments {
+        arg("dagger.formatGeneratedSource", "disabled")
+        arg("dagger.gradle.incremental", "enabled")
+        arg("room.schemaLocation", "$projectDir/schemas".toString())
+    }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.core:core-ktx:1.0.2'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation Dependencies.kotlinStdLib
+
+    implementation Dependencies.appCompat
+    implementation Dependencies.ktxCore
+
+    implementation Dependencies.emoji
+    implementation Dependencies.emojiCompat
+
+    implementation Dependencies.recyclerView
+
+    implementation Dependencies.liveData
+    implementation Dependencies.viewModel
+
+    api Dependencies.dagger2
+    kapt Dependencies.dagger2Compiler
+
+    implementation Dependencies.moshiKotlin
+    kapt Dependencies.moshiCodegen
+
+    implementation Dependencies.retrofit
+    implementation Dependencies.retrofitRxJavaAdapter
+    implementation Dependencies.retrofitMoshiConverter
+
+    implementation Dependencies.rxJava2
+    implementation Dependencies.rxAndroid2
+
+    implementation Dependencies.room
+    kapt Dependencies.roomCompiler
+    implementation Dependencies.roomRxJava2
+
+    implementation Dependencies.rxRedux
+    implementation Dependencies.rxRelay
+
+    implementation Dependencies.okHttp
+
+    implementation Dependencies.timber
+
+    debugImplementation Dependencies.stetho
+    debugImplementation Dependencies.stehoInterceptor
+    debugImplementation Dependencies.okHttpLoggingInterceptor
+
+    testImplementation TestDependencies.junit
+    testImplementation TestDependencies.mockk
+    testImplementation TestDependencies.room
+
+    androidTestImplementation TestDependencies.androidxJunit
+    androidTestImplementation TestDependencies.mockkAndroid
+    androidTestImplementation TestDependencies.espressoCore
+
 }
