@@ -20,6 +20,13 @@
       android:id="@+id/recycler_view"
       android:layout_width="match_parent"
       android:layout_height="match_parent" />
+
+    <ProgressBar
+      android:id="@+id/progress_bar"
+      android:layout_width="48dp"
+      android:layout_height="48dp"
+      android:visibility="gone"
+      android:layout_gravity="center"/>
   </FrameLayout>
 
 </LinearLayout>

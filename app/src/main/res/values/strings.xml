@@ -38,5 +38,6 @@
   <string name="currency_name_thb">Thai baht</string>
   <string name="currency_name_usd">US dollar</string>
   <string name="currency_name_zar">South African rand</string>
+  <string name="zero">0</string>
 
 </resources>
