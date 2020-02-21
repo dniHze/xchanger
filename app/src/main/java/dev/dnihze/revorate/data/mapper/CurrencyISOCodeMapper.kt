@@ -1,7 +1,7 @@
 package dev.dnihze.revorate.data.mapper
 
 import androidx.collection.LruCache
-import dev.dnihze.revorate.common.Mapper
+import dev.dnihze.revorate.utils.common.Mapper
 import dev.dnihze.revorate.model.Currency
 import javax.inject.Inject
 import javax.inject.Singleton

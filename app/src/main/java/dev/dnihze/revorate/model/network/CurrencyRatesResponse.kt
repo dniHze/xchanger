@@ -7,5 +7,5 @@ import java.math.BigDecimal
 @JsonClass(generateAdapter = true)
 data class CurrencyRatesResponse(
     @Json(name = "baseCurrency") val baseCurrency: String,
-    @Json(name = "rates") val exchangeRates: Map<String, BigDecimal>
+    @Json(name = "rates") val exchangeRates: Map<String, Double>
 )

@@ -1,13 +1,12 @@
 package dev.dnihze.revorate.di.module
 
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dev.dnihze.revorate.BuildConfig
-import dev.dnihze.revorate.common.applyEach
+import dev.dnihze.revorate.utils.ext.applyEach
 import dev.dnihze.revorate.data.network.impl.ApiService
 import dev.dnihze.revorate.data.platform.ConnectionWatcher
 import dev.dnihze.revorate.data.platform.impl.ConnectionWatcherImpl

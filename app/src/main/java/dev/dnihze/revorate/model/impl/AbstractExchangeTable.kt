@@ -33,7 +33,7 @@ abstract class AbstractExchangeTable : ExchangeTable {
 
     override operator fun get(currency: Currency): ExchangeRate? {
         if (currency == baseCurrency && !exchangeRateStorage.containsKey(currency.isoCode)) {
-            return ExchangeRate(BigDecimal.ONE, currency, currency)
+            return ExchangeRate(1.0, currency, currency)
         }
 
         return if (currency in this) {

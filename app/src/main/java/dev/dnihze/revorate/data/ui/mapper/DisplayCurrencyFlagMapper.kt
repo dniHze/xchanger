@@ -2,7 +2,7 @@ package dev.dnihze.revorate.data.ui.mapper
 
 import androidx.annotation.StringRes
 import dev.dnihze.revorate.R
-import dev.dnihze.revorate.common.Mapper
+import dev.dnihze.revorate.utils.common.Mapper
 import dev.dnihze.revorate.model.Currency
 import javax.inject.Inject
 

@@ -4,7 +4,7 @@ import com.freeletics.rxredux.StateAccessor
 import com.freeletics.rxredux.reduxStore
 import com.jakewharton.rxrelay2.PublishRelay
 import com.jakewharton.rxrelay2.Relay
-import dev.dnihze.revorate.common.retryWithExponentialBackoff
+import dev.dnihze.revorate.data.lifecycle.AppStateObserver
 import dev.dnihze.revorate.data.local.LocalDataSource
 import dev.dnihze.revorate.data.network.NetworkDataSource
 import dev.dnihze.revorate.data.platform.ConnectionWatcher
@@ -12,13 +12,13 @@ import dev.dnihze.revorate.data.ui.MainScreenListFactory
 import dev.dnihze.revorate.model.Currency
 import dev.dnihze.revorate.model.CurrencyAmount
 import dev.dnihze.revorate.model.ExchangeTable
+import dev.dnihze.revorate.model.lifecycle.AppState
 import dev.dnihze.revorate.model.network.exception.ApiException
+import dev.dnihze.revorate.utils.ext.retryWithExponentialBackoff
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
-import java.lang.IllegalStateException
-import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -26,7 +26,8 @@ class MainScreenStateMachine @Inject constructor(
     private val networkDataSource: NetworkDataSource,
     private val localDataSource: LocalDataSource,
     private val mainScreenListFactory: MainScreenListFactory,
-    private val connectionWatcher: ConnectionWatcher
+    private val connectionWatcher: ConnectionWatcher,
+    private val appStateObserver: AppStateObserver
 ) {
 
     private val tag: String
@@ -52,9 +53,6 @@ class MainScreenStateMachine @Inject constructor(
             )
         )
         .distinctUntilChanged()
-        .doOnNext {
-            Timber.tag(tag).i("New state -> $it")
-        }
 
 
     @Suppress("UNUSED_PARAMETER")
@@ -67,7 +65,6 @@ class MainScreenStateMachine @Inject constructor(
                 localDataSource.getLocalExchangeTable()
                     .subscribeOn(Schedulers.io())
             }
-            .doOnNext { Timber.tag(tag).i("Table loaded from DB -> $it") }
             .filter { table -> !table.isEmpty() }
             .map { table -> MainScreenAction.LocalDBTableLoaded(table) as MainScreenAction }
             .startWith(MainScreenAction.LoadNetworkTable(null))
@@ -79,18 +76,25 @@ class MainScreenStateMachine @Inject constructor(
     ): Observable<MainScreenAction> {
         return actions.ofType(MainScreenAction.InitScreen::class.java)
             .switchMap {
-                Observable.interval(1L, 1L, TimeUnit.SECONDS)
-                    .subscribeOn(Schedulers.computation())
-                    .filter {
-                        val currentState = state()
-                        !currentState.isErrorState() && !currentState.isLoadingState()
-                    }
-                    .map {
-                        MainScreenAction.LoadNetworkTable(state().getCurrentCurrency()) as MainScreenAction
-                    }
-                    .doOnNext {
-                        Timber.tag(tag).i("HeartBeat sent -> $it")
-                    }
+                appStateObserver.observe()
+            }
+            .switchMap { appState ->
+                if (appState == AppState.FOREGROUND) {
+                    Observable.interval(1L, 1L, TimeUnit.SECONDS)
+                        .subscribeOn(Schedulers.computation())
+                        .filter {
+                            val currentState = state()
+                            !currentState.isErrorState() && !currentState.isLoadingState()
+                        }
+                        .map {
+                            MainScreenAction.LoadNetworkTable(state().getCurrentCurrency()) as MainScreenAction
+                        }
+                        .doOnNext {
+                            Timber.tag(tag).i("HeartBeat sent")
+                        }
+                } else {
+                    Observable.never()
+                }
             }
     }
 
@@ -126,18 +130,10 @@ class MainScreenStateMachine @Inject constructor(
     ): Observable<MainScreenAction> {
         return actions.ofType(MainScreenAction.LoadNetworkTable::class.java)
             .doOnNext { Timber.tag(tag).i("New network load event -> $it") }
-            .switchMapSingle { action ->
-                if (action.currency != null) {
-                    Single.just(action.currency)
-                } else {
-                    getCurrency()
-                }
-            }
-            .switchMapSingle { _ ->
+            .switchMapSingle {
                 networkDataSource.getExchangeTable(Currency.EUR)
                     .subscribeOn(Schedulers.io())
                     .retryWithExponentialBackoff()
-                    .doOnSuccess { Timber.tag(tag).i("Network table received -> $it") }
             }
             .switchMapSingle { loadedExchangeTable ->
                 getExchangeTable(state)
@@ -214,7 +210,7 @@ class MainScreenStateMachine @Inject constructor(
                         val table = action.exchangeTable.order()
                         val currency = table.baseCurrency
                         if (currency != null) {
-                            val amount = CurrencyAmount(BigDecimal.ONE, currency)
+                            val amount = CurrencyAmount(1.0, currency)
                             MainScreenState.LoadAndDisplayState(
                                 currentAmount = amount,
                                 exchangeTable = table,
@@ -447,12 +443,6 @@ class MainScreenStateMachine @Inject constructor(
         return newState
     }
 
-    private fun getCurrency(): Single<Currency> {
-        return localDataSource.getSingleExchangeTable()
-            .subscribeOn(Schedulers.io())
-            .map { it.baseCurrency ?: Currency.EUR }
-    }
-
     private fun getExchangeTable(
         state: StateAccessor<MainScreenState>
     ): Single<ExchangeTable> {
@@ -474,5 +464,4 @@ class MainScreenStateMachine @Inject constructor(
             else -> MainScreenError.Unknown(this)
         }
     }
-
 }

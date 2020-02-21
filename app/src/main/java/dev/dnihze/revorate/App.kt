@@ -1,18 +1,16 @@
 package dev.dnihze.revorate
 
 import android.app.Application
-import androidx.emoji.text.EmojiCompat
 import dev.dnihze.revorate.di.AppComponentDelegate
 import dev.dnihze.revorate.di.AppComponentProvider
-import dev.dnihze.revorate.utils.emoji.EmojiCompatInitializer
-import dev.dnihze.revorate.utils.stetho.StethoInitializer
+import dev.dnihze.revorate.utils.init.InitOnAppStart
 import timber.log.Timber
 import javax.inject.Inject
 
 class App : Application() {
 
-    @Inject lateinit var stethoInitializer: StethoInitializer
-    @Inject lateinit var emojiCompatInitializer: EmojiCompatInitializer
+    @JvmSuppressWildcards
+    @Inject lateinit var initializers: Set<InitOnAppStart>
 
     override fun onCreate() {
         super.onCreate()
@@ -21,13 +19,21 @@ class App : Application() {
             Timber.plant(Timber.DebugTree())
         }
 
-        if (!appComponentDelegate.isInitialized()) {
+        initDagger()
+        initLibs()
+    }
+
+    private fun initDagger() {
+        if (!appComponentDelegate.isInitialized())
             appComponentDelegate.init(this)
-        }
 
         appComponentDelegate.getAppComponent().inject(this)
-        stethoInitializer.init()
-        emojiCompatInitializer.init()
+    }
+
+    private fun initLibs() {
+       initializers.forEach { initializer ->
+           initializer.init()
+       }
     }
 
     companion object {

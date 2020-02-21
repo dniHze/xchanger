@@ -1,18 +1,19 @@
-package dev.dnihze.revorate.utils.emoji
+package dev.dnihze.revorate.utils.init.emoji
 
 import android.content.Context
 import androidx.core.provider.FontRequest
 import androidx.emoji.text.EmojiCompat
 import androidx.emoji.text.FontRequestEmojiCompatConfig
 import dev.dnihze.revorate.R
+import dev.dnihze.revorate.utils.init.InitOnAppStart
 import timber.log.Timber
 import javax.inject.Inject
 
 class EmojiCompatInitializer @Inject constructor(
     private val appContext: Context
-) {
+): InitOnAppStart {
 
-    fun init() {
+    override fun init() {
         // Use a downloadable font for EmojiCompat
         val fontRequest = FontRequest(
             "com.google.android.gms.fonts",

@@ -1,21 +1,19 @@
 package dev.dnihze.revorate.model
 
-import java.math.BigDecimal
-
 
 data class ExchangeRate(
-    val rate: BigDecimal,
+    val rate: Double,
     val forCurrency: Currency,
     val ofCurrency: Currency
 ) {
 
     init {
         // Pre-requirements
-        assert(forCurrency != ofCurrency || rate == BigDecimal.ONE) {
+        assert(forCurrency != ofCurrency || rate == 1.0) {
             "Same currency exchange rate is always supposed to be 1.0. Created exchange rate: $this."
         }
 
-        assert(rate > BigDecimal.ZERO) {
+        assert(rate > 0) {
             "Exchange rate can't be 0 or less than 0. Created exchange rate: $this."
         }
     }
@@ -57,7 +55,7 @@ data class ExchangeRate(
         }
 
         return if (anotherRate == this) {
-            ExchangeRate(BigDecimal.ONE, anotherRate.ofCurrency, anotherRate.ofCurrency)
+            ExchangeRate(anotherRate.rate, anotherRate.ofCurrency, anotherRate.ofCurrency)
         } else {
             ExchangeRate(
                 rate = this.rate / anotherRate.rate,
@@ -76,7 +74,7 @@ data class ExchangeRate(
      */
     fun invert(): ExchangeRate {
         return ExchangeRate(
-            rate = BigDecimal.ONE / this.rate,
+            rate = 1.0 / this.rate,
             forCurrency = this.ofCurrency,
             ofCurrency = this.forCurrency
         )

@@ -2,7 +2,6 @@ package dev.dnihze.revorate.ui.main
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -10,11 +9,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dev.dnihze.revorate.App
 import dev.dnihze.revorate.R
-import dev.dnihze.revorate.common.injectViewModel
+import dev.dnihze.revorate.utils.ext.injectViewModel
 import dev.dnihze.revorate.redux.main.MainScreenAction
 import dev.dnihze.revorate.redux.main.MainScreenState
 import dev.dnihze.revorate.ui.main.adapter.CurrencyAdapter
-import timber.log.Timber
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {

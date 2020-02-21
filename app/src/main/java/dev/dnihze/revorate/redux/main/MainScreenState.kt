@@ -7,7 +7,11 @@ import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
 
 sealed class MainScreenState {
 
-    object LoadingState : MainScreenState()
+    object LoadingState : MainScreenState() {
+        override fun toString(): String {
+            return "LoadingState"
+        }
+    }
 
     data class DisplayState(
         val currentAmount: CurrencyAmount,
@@ -30,6 +34,10 @@ sealed class MainScreenState {
                 exchangeTable,
                 displayItems
             )
+        }
+
+        override fun toString(): String {
+            return "DisplayState(currentAmount: $currentAmount)"
         }
     }
 
@@ -55,11 +63,19 @@ sealed class MainScreenState {
                 displayItems
             )
         }
+
+        override fun toString(): String {
+            return "LoadAndDisplayState(currentAmount: $currentAmount)"
+        }
     }
 
     data class ErrorState(
         var error: MainScreenError
-    ) : MainScreenState()
+    ) : MainScreenState() {
+        override fun toString(): String {
+            return "ErrorState(error: $error)"
+        }
+    }
 
     data class ErrorAndDisplayState(
         val currentAmount: CurrencyAmount,
@@ -74,6 +90,10 @@ sealed class MainScreenState {
                 exchangeTable,
                 displayItems
             )
+        }
+
+        override fun toString(): String {
+            return "ErrorAndDisplayState(currentAmount: $currentAmount, error: $error)"
         }
     }
 

@@ -11,11 +11,14 @@ import javax.inject.Singleton
 @Component(
     modules = [
         AppModule::class,
+        AppInitModule::class,
+        DevModule::class,
         NetworkModule::class,
         DataSourceModule::class,
         DevModule::class,
         DBModule::class,
-        ViewModelModule::class
+        ViewModelModule::class,
+        LifecycleModule::class
     ]
 )
 @Singleton

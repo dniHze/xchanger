@@ -1,8 +1,7 @@
 package dev.dnihze.revorate.data.ui.mapper
 
 import androidx.collection.SparseArrayCompat
-import dev.dnihze.revorate.common.Mapper
-import dev.dnihze.revorate.model.Currency
+import dev.dnihze.revorate.utils.common.Mapper
 import dev.dnihze.revorate.model.CurrencyAmount
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -26,7 +25,7 @@ class DisplayAmountMapper @Inject constructor(): Mapper<CurrencyAmount, CharSequ
     private fun getPattern(amount: CurrencyAmount): String {
         val currency = amount.currency
         val digitsAfterSeparator = currency.digitsAfterSeparator.takeUnless {
-            amount.amount.toBigInteger().toBigDecimal() == amount.amount
+            amount.amount.toInt().toDouble() == amount.amount
         } ?: 0
 
         val pattern = patternCache[digitsAfterSeparator]

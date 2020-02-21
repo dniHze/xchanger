@@ -1,23 +1,22 @@
 package dev.dnihze.revorate.model
 
-import java.math.BigDecimal
 import java.math.RoundingMode
 
 data class CurrencyAmount(
-    val sourceAmount: BigDecimal,
+    val sourceAmount: Double,
     val currency: Currency
 ) {
 
-    val amount = sourceAmount.setScale(2, RoundingMode.UP)
+    val amount = sourceAmount.toBigDecimal().setScale(2, RoundingMode.HALF_EVEN).toDouble()
 
     init {
-        assert(sourceAmount >= BigDecimal.ZERO) {
+        assert(sourceAmount >= 0) {
             "Amount supposed to be positive only."
         }
     }
 
     override fun toString(): String {
-        return "CurrencyAmount($amount $currency)"
+        return "CurrencyAmount($amount ($sourceAmount) $currency)"
     }
 
     operator fun times(rate: ExchangeRate): CurrencyAmount {

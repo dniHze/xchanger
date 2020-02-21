@@ -1,8 +1,9 @@
 package dev.dnihze.revorate.data.local.mapper
 
-import dev.dnihze.revorate.common.Mapper
+import dev.dnihze.revorate.utils.common.Mapper
 import dev.dnihze.revorate.model.ExchangeTable
 import dev.dnihze.revorate.model.local.ExchangeRateDBEntity
+import java.math.RoundingMode
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,7 +15,7 @@ class ExchangeRateLocalMapper @Inject constructor(): Mapper<ExchangeTable, List<
             ExchangeRateDBEntity(
                 forCurrency = rate.forCurrency.isoCode,
                 ofCurrency = rate.ofCurrency.isoCode,
-                rate = rate.rate.toString(),
+                rate = rate.rate.toBigDecimal().setScale(10, RoundingMode.HALF_EVEN).toString(),
                 order = index
             )
         }

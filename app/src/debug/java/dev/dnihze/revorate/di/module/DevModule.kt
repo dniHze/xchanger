@@ -2,14 +2,14 @@ package dev.dnihze.revorate.di.module
 
 import dagger.Binds
 import dagger.Module
-import dev.dnihze.revorate.utils.stetho.StethoInitializer
-import dev.dnihze.revorate.utils.stetho.impl.DebugStethoInitializer
-import javax.inject.Singleton
+import dagger.multibindings.IntoSet
+import dev.dnihze.revorate.utils.init.InitOnAppStart
+import dev.dnihze.revorate.utils.init.stetho.impl.DebugStethoInitializer
 
 @Module
 abstract class DevModule {
 
     @Binds
-    @Singleton
-    abstract fun bindStethoInitializer(initializer: DebugStethoInitializer): StethoInitializer
+    @IntoSet
+    abstract fun bindStethoInitializer(initializer: DebugStethoInitializer): InitOnAppStart
 }

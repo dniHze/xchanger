@@ -1,6 +1,6 @@
 package dev.dnihze.revorate.data.network.mapper
 
-import dev.dnihze.revorate.common.Mapper
+import dev.dnihze.revorate.utils.common.Mapper
 import dev.dnihze.revorate.data.mapper.CurrencyISONameMapper
 import dev.dnihze.revorate.model.ExchangeRate
 import dev.dnihze.revorate.model.ExchangeTable

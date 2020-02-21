@@ -1,4 +1,4 @@
-package dev.dnihze.revorate.common
+package dev.dnihze.revorate.utils.ext
 
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel

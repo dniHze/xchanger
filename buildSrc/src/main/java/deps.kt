@@ -42,6 +42,8 @@ object Dependencies {
 
     const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.lifecycle}"
     const val liveData = "androidx.lifecycle:lifecycle-livedata-ktx:${Versions.lifecycle}"
+    const val lifecycleProcess = "androidx.lifecycle:lifecycle-process:${Versions.lifecycle}"
+    const val lifecycleCompiler  = "androidx.lifecycle:lifecycle-compiler:${Versions.lifecycle}"
 
     const val retrofit = "com.squareup.retrofit2:retrofit:${Versions.retrofit}"
     const val retrofitRxJavaAdapter = "com.squareup.retrofit2:adapter-rxjava2:${Versions.retrofit}"

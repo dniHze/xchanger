@@ -1,6 +1,6 @@
 package dev.dnihze.revorate.data.local.mapper
 
-import dev.dnihze.revorate.common.Mapper
+import dev.dnihze.revorate.utils.common.Mapper
 import dev.dnihze.revorate.data.mapper.CurrencyISOCodeMapper
 import dev.dnihze.revorate.model.ExchangeRate
 import dev.dnihze.revorate.model.ExchangeTable
@@ -22,7 +22,7 @@ class ExchangeTableLocalMapper @Inject constructor(
             if (forCurrency != null && ofCurrency != null) {
                 ExchangeRate(
                     forCurrency = forCurrency,
-                    rate = BigDecimal(entity.rate),
+                    rate = BigDecimal(entity.rate).setScale(10).toDouble(),
                     ofCurrency = ofCurrency
                 )
             } else {
