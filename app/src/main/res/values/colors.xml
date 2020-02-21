@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="colorPrimary">#008577</color>
+  <color name="colorPrimary">@android:color/white</color>
   <color name="colorPrimaryDark">#CCCCCC</color>
-  <color name="colorAccent">#D81B60</color>
+  <color name="colorAccent">#008577</color>
 
   <color name="primary_text">#191C1F</color>
   <color name="secondary_text">#8B959E</color>
+
+  <color name="status_bar_color">#33000000</color>
+  <color name="nav_bar_color">#33000000</color>
+
+  <color name="toolbar_color">#B3FFFFFF</color>
+
+  <color name="background_color">@android:color/white</color>
+
 </resources>

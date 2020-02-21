@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:gravity="center"
+  android:orientation="vertical"
+  android:padding="32dp">
+
+  <androidx.appcompat.widget.AppCompatImageView
+    android:id="@+id/error_image_view"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:contentDescription="@null"
+    tools:src="@drawable/ic_no_internet" />
+
+  <androidx.appcompat.widget.AppCompatTextView
+    android:id="@+id/error_title"
+    style="@style/EmptyView.Title"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    tools:text="No internet connection" />
+
+  <androidx.appcompat.widget.AppCompatTextView
+    android:id="@+id/error_description"
+    style="@style/EmptyView.Description"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    tools:text="Some very long decription of an encountered issue" />
+
+
+  <androidx.appcompat.widget.AppCompatButton
+    android:id="@+id/error_button"
+    style="@style/EmptyView.Button"
+    android:layout_width="wrap_content"
+    android:minWidth="156dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    tools:text="Action" />
+</LinearLayout>

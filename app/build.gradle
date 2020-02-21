@@ -51,6 +51,8 @@ dependencies {
     implementation Dependencies.emoji
     implementation Dependencies.emojiCompat
 
+    implementation Dependencies.material
+
     implementation Dependencies.recyclerView
 
     implementation Dependencies.liveData
@@ -58,6 +60,9 @@ dependencies {
 
     implementation Dependencies.lifecycleProcess
     kapt Dependencies.lifecycleCompiler
+
+    implementation Dependencies.insetter
+    implementation Dependencies.insetterKTX
 
     api Dependencies.dagger2
     kapt Dependencies.dagger2Compiler

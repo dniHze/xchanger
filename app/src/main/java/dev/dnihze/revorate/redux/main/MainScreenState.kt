@@ -1,6 +1,5 @@
 package dev.dnihze.revorate.redux.main
 
-import dev.dnihze.revorate.model.Currency
 import dev.dnihze.revorate.model.CurrencyAmount
 import dev.dnihze.revorate.model.ExchangeTable
 import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
@@ -16,7 +15,8 @@ sealed class MainScreenState {
     data class DisplayState(
         val currentAmount: CurrencyAmount,
         val exchangeTable: ExchangeTable,
-        val displayItems: List<CurrencyDisplayItem>
+        val displayItems: List<CurrencyDisplayItem>,
+        val scrollToFirst: Boolean
     ) : MainScreenState() {
 
         fun toErrorAndDisplayState(error: MainScreenError): ErrorAndDisplayState {
@@ -24,7 +24,8 @@ sealed class MainScreenState {
                 currentAmount,
                 exchangeTable,
                 displayItems,
-                error
+                error,
+                false
             )
         }
 
@@ -32,9 +33,12 @@ sealed class MainScreenState {
             return LoadAndDisplayState(
                 currentAmount,
                 exchangeTable,
-                displayItems
+                displayItems,
+                false
             )
         }
+
+        fun getFreeInput(): CharSequence? = displayItems.firstOrNull()?.freeInput
 
         override fun toString(): String {
             return "DisplayState(currentAmount: $currentAmount)"
@@ -44,7 +48,8 @@ sealed class MainScreenState {
     data class LoadAndDisplayState(
         val currentAmount: CurrencyAmount,
         val exchangeTable: ExchangeTable,
-        val displayItems: List<CurrencyDisplayItem>
+        val displayItems: List<CurrencyDisplayItem>,
+        val scrollToFirst: Boolean
     ) : MainScreenState() {
 
         fun toErrorAndDisplayState(error: MainScreenError): ErrorAndDisplayState {
@@ -52,7 +57,8 @@ sealed class MainScreenState {
                 currentAmount,
                 exchangeTable,
                 displayItems,
-                error
+                error,
+                false
             )
         }
 
@@ -60,9 +66,12 @@ sealed class MainScreenState {
             return DisplayState(
                 currentAmount,
                 exchangeTable,
-                displayItems
+                displayItems,
+                false
             )
         }
+
+        fun getFreeInput(): CharSequence? = displayItems.firstOrNull()?.freeInput
 
         override fun toString(): String {
             return "LoadAndDisplayState(currentAmount: $currentAmount)"
@@ -81,16 +90,20 @@ sealed class MainScreenState {
         val currentAmount: CurrencyAmount,
         val exchangeTable: ExchangeTable,
         val displayItems: List<CurrencyDisplayItem>,
-        val error: MainScreenError
+        val error: MainScreenError,
+        val scrollToFirst: Boolean
     ) : MainScreenState() {
 
         fun toLoadingAndDisplayState(): LoadAndDisplayState {
             return LoadAndDisplayState(
                 currentAmount,
                 exchangeTable,
-                displayItems
+                displayItems,
+                false
             )
         }
+
+        fun getFreeInput(): CharSequence? = displayItems.firstOrNull()?.freeInput
 
         override fun toString(): String {
             return "ErrorAndDisplayState(currentAmount: $currentAmount, error: $error)"
@@ -99,17 +112,6 @@ sealed class MainScreenState {
 
     fun isErrorState(): Boolean = this is ErrorState || this is ErrorAndDisplayState
     fun isLoadingState(): Boolean = this is LoadingState || this is LoadAndDisplayState
-    fun isDisplayState(): Boolean =
-        this is DisplayState || this is LoadAndDisplayState || this is ErrorAndDisplayState
-
-    fun getCurrentCurrency(): Currency? {
-        return when (this) {
-            is DisplayState -> currentAmount.currency
-            is LoadAndDisplayState -> currentAmount.currency
-            is ErrorAndDisplayState -> currentAmount.currency
-            else -> null
-        }
-    }
 
     fun exchangeTable(): ExchangeTable? {
         return when (this) {

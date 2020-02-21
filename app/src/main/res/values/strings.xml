@@ -3,6 +3,23 @@
 
   <string name="all_error_retry">Retry</string>
   <string name="all_error_oops">Oops… Something wen\'t wrong.</string>
+  <string name="all_error_no_internet">No Internet connection.</string>
+
+  <string name="all_loading">Loading rates…</string>
+
+  <string name="all_error_network_connection_title">No Internet connection.</string>
+  <string name="all_error_network_connection_description">You are not connected to the Internet. Can\'t retrieve actual currency info.</string>
+
+  <string name="all_error_network_api_title">Server error: %1$d</string>
+  <string name="all_error_network_api_description">Something is wrong with the server in this moment. Try again later.</string>
+
+  <string name="all_error_unknown_title">Oops…</string>
+  <string name="all_error_unknown_description">Something went wrong with the app.</string>
+  <string name="all_error_unknown_description_message">Something went wrong with the app. Message: %1$s</string>
+
+  <string name="content_description_network">No Internet image</string>
+  <string name="content_description_api">Server error image</string>
+  <string name="content_description_unknown">Unknown error image</string>
 
   <string name="toolbar_title">Rates</string>
 
@@ -38,6 +55,7 @@
   <string name="currency_name_thb">Thai baht</string>
   <string name="currency_name_usd">US dollar</string>
   <string name="currency_name_zar">South African rand</string>
+
   <string name="zero">0</string>
 
 </resources>

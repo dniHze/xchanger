@@ -42,6 +42,10 @@ class MainViewModel @Inject constructor(
         disposables.dispose()
     }
 
+    override fun onNewInput(input: String, previousAmount: CurrencyAmount) {
+        this.input.accept(MainScreenAction.NewInput(input, previousAmount))
+    }
+
     override fun onNewCurrency(currencyAmount: CurrencyAmount) {
         input.accept(MainScreenAction.NewAmount(currencyAmount))
     }

@@ -2,22 +2,58 @@
 
   <!-- Base application theme. -->
 
-  <style name="TextStyle"/>
+  <style name="TextStyle" />
 
   <style name="TextStyle.Title">
     <item name="android:textSize">16sp</item>
+    <item name="android:letterSpacing">-0.02</item>
     <item name="android:textStyle">bold</item>
+    <item name="lineHeight">24sp</item>
     <item name="android:textColor">@color/primary_text</item>
   </style>
 
   <style name="TextStyle.Subtitle">
     <item name="android:textSize">14sp</item>
+    <item name="android:letterSpacing">-0.011</item>
+    <item name="lineHeight">20sp</item>
     <item name="android:textColor">@color/secondary_text</item>
   </style>
 
   <style name="TextStyle.EditField">
     <item name="android:textSize">20sp</item>
     <item name="android:textStyle">bold</item>
+    <item name="android:letterSpacing">0.019</item>
     <item name="android:textColor">@color/primary_text</item>
+  </style>
+
+  <style name="EmptyView" />
+
+  <style name="EmptyView.Title">
+    <item name="android:textSize">20sp</item>
+    <item name="android:textColor">@color/secondary_text</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:textAlignment">center</item>
+    <item name="android:maxLines">2</item>
+  </style>
+
+  <style name="EmptyView.Description">
+    <item name="android:textSize">16sp</item>
+    <item name="android:textColor">@color/secondary_text</item>
+    <item name="android:textAlignment">center</item>
+    <item name="android:maxLines">3</item>
+  </style>
+
+  <style name="EmptyView.Button" parent="@style/Widget.AppCompat.Button.Borderless.Colored">
+    <item name="android:textSize">17sp</item>
+    <item name="android:textStyle">bold</item>
+  </style>
+
+  <style name="ProgressView" />
+  <style name="ProgressView.Title">
+    <item name="android:textSize">18sp</item>
+    <item name="android:textColor">@color/secondary_text</item>
+    <item name="android:textAlignment">center</item>
+    <item name="android:textStyle">bold</item>
+    <item name="android:maxLines">2</item>
   </style>
 </resources>

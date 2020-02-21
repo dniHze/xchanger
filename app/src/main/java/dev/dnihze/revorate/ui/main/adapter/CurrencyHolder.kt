@@ -5,13 +5,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.view.postDelayed
 import androidx.core.widget.addTextChangedListener
 import androidx.emoji.widget.EmojiAppCompatTextView
 import androidx.recyclerview.widget.RecyclerView
 import dev.dnihze.revorate.R
-import dev.dnihze.revorate.model.CurrencyAmount
 import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
 import dev.dnihze.revorate.ui.main.util.AdapterActionsDelegate
+import dev.dnihze.revorate.ui.main.util.RequestKeyboardPayload
 import dev.dnihze.revorate.utils.ext.showKeyboard
 
 class CurrencyHolder(
@@ -40,13 +41,13 @@ class CurrencyHolder(
 
             if (!adapterData.inputEnabled) {
                 delegate.onNewCurrency(adapterData.amount)
-                if (!input.hasFocus())
-                    input.requestFocus()
-                input.showKeyboard()
+                itemView.postDelayed(20L) {
+                    input.showKeyboard()
+                }
             } else {
-                if (!input.hasFocus())
-                    input.requestFocus()
-                input.showKeyboard()
+                itemView.post {
+                    input.showKeyboard()
+                }
             }
         }
 
@@ -54,11 +55,7 @@ class CurrencyHolder(
             if (!isAdapterPositionValid()) return@addTextChangedListener
             val data = adapterData
             if (data.inputEnabled) {
-                val number = text?.toString()?.toDoubleOrNull() ?: 0.0
-                if (number != data.amount.amount) {
-                    val newAmount = CurrencyAmount(number, currency = data.amount.currency)
-                    delegate.onNewCurrency(newAmount)
-                }
+                delegate.onNewInput(text?.toString() ?: "", data.amount)
             }
         })
     }
@@ -70,9 +67,12 @@ class CurrencyHolder(
         emoji.setText(data.currencyFlagEmojiId)
         subtitle.setText(data.currencyFullNameId)
 
-        if (!input.isFocused || !data.inputEnabled) {
+        if (!data.inputEnabled) {
             input.setText(data.displayAmount)
             input.setSelection(data.displayAmount.length)
+        } else if (data.freeInput != null && data.freeInput != (input.text?.toString() ?: "")) {
+            input.setText(data.freeInput)
+            input.setSelection(data.freeInput.length)
         }
 
         input.isEnabled = data.inputEnabled
@@ -85,9 +85,13 @@ class CurrencyHolder(
     }
 
     fun bind(payloads: List<Any>) {
-        if (payloads.isEmpty()) {
-            bind()
-            return
+        bind()
+
+        val payload = payloads.firstOrNull() as? RequestKeyboardPayload
+        if (payload != null) {
+            itemView.post {
+                input.showKeyboard()
+            }
         }
     }
 

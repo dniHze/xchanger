@@ -49,7 +49,8 @@ class MainScreenStateMachine @Inject constructor(
                 ::initConnectionWatcherSideEffect,
                 ::connectivitySideEffect,
                 ::currencyChangedSideEffect,
-                ::retrySideEffect
+                ::retrySideEffect,
+                ::newInputSideEffect
             )
         )
         .distinctUntilChanged()
@@ -67,7 +68,7 @@ class MainScreenStateMachine @Inject constructor(
             }
             .filter { table -> !table.isEmpty() }
             .map { table -> MainScreenAction.LocalDBTableLoaded(table) as MainScreenAction }
-            .startWith(MainScreenAction.LoadNetworkTable(null))
+            .startWith(MainScreenAction.LoadNetworkTable)
     }
 
     private fun initHeartBeatSideEffect(
@@ -87,7 +88,7 @@ class MainScreenStateMachine @Inject constructor(
                             !currentState.isErrorState() && !currentState.isLoadingState()
                         }
                         .map {
-                            MainScreenAction.LoadNetworkTable(state().getCurrentCurrency()) as MainScreenAction
+                            MainScreenAction.LoadNetworkTable as MainScreenAction
                         }
                         .doOnNext {
                             Timber.tag(tag).i("HeartBeat sent")
@@ -134,26 +135,25 @@ class MainScreenStateMachine @Inject constructor(
                 networkDataSource.getExchangeTable(Currency.EUR)
                     .subscribeOn(Schedulers.io())
                     .retryWithExponentialBackoff()
+                    .flatMap { loadedExchangeTable ->
+                        getExchangeTable(state)
+                            .map { localTable -> localTable to loadedExchangeTable }
+                    }
+                    .flatMap { (localTable, networkTable) ->
+                        if (localTable.isEmpty()) {
+                            localDataSource.saveExchangeTable(networkTable.order())
+                                .subscribeOn(Schedulers.io())
+                        } else {
+                            val baseCurrency = localTable.baseCurrency
+                                ?: throw IllegalStateException("Non empty table can have empty base currency")
+                            val table = networkTable.newTableFor(baseCurrency)
+                                ?: throw IllegalStateException("Table can't be created")
+                            localDataSource.saveExchangeTable(table.orderWith(localTable))
+                                .subscribeOn(Schedulers.io())
+                        }.andThen(Single.just(MainScreenAction.NetworkTableLoaded as MainScreenAction))
+                    }
+                    .onErrorResumeNext { t -> Single.just(MainScreenAction.Error(t)) }
             }
-            .switchMapSingle { loadedExchangeTable ->
-                getExchangeTable(state)
-                    .map { localTable -> localTable to loadedExchangeTable }
-            }
-            .switchMapSingle { (localTable, networkTable) ->
-                if (localTable.isEmpty()) {
-                    localDataSource.saveExchangeTable(networkTable.order())
-                        .subscribeOn(Schedulers.io())
-                } else {
-                    val baseCurrency = localTable.baseCurrency
-                        ?: throw IllegalStateException("Non empty table can have empty base currency")
-                    val table = networkTable.newTableFor(baseCurrency)
-                        ?: throw IllegalStateException("Table can't be created")
-                    localDataSource.saveExchangeTable(table.orderWith(localTable))
-                        .subscribeOn(Schedulers.io())
-                }.andThen(Single.just(MainScreenAction.NetworkTableLoaded as MainScreenAction))
-            }
-            .onErrorReturn { t -> MainScreenAction.Error(t) }
-
     }
 
     private fun currencyChangedSideEffect(
@@ -172,28 +172,42 @@ class MainScreenStateMachine @Inject constructor(
                 localDataSource.saveExchangeTable(
                     table.newTableFor(amount.currency)
                         ?: throw IllegalStateException("Can't be created.")
-                )
-                    .subscribeOn(Schedulers.io())
+                ).subscribeOn(Schedulers.io())
                     .andThen(Single.fromCallable {
                         if (state().isErrorState()) {
                             MainScreenAction.Retry
                         } else {
-                            MainScreenAction.LoadNetworkTable(amount.currency)
+                            MainScreenAction.LoadNetworkTable
                         }
                     })
             }
-            .onErrorReturn { t -> MainScreenAction.Error(t) }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun retrySideEffect(
         actions: Observable<MainScreenAction>,
         state: StateAccessor<MainScreenState>
     ): Observable<MainScreenAction> {
         return actions.ofType(MainScreenAction.Retry::class.java)
-            .filter {
-                !state().isLoadingState()
+            .map { MainScreenAction.LoadNetworkTable }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun newInputSideEffect(
+        actions: Observable<MainScreenAction>,
+        state: StateAccessor<MainScreenState>
+    ): Observable<MainScreenAction> {
+        return actions.ofType(MainScreenAction.NewInput::class.java)
+            .map { input ->
+                val inputNumber = input.input.toDoubleOrNull() ?: 0.0
+                inputNumber to input.previousAmount
             }
-            .map { MainScreenAction.LoadNetworkTable(state().getCurrentCurrency()) }
+            .filter { (inputNumber, previousAmount) ->
+                inputNumber != previousAmount.amount
+            }
+            .map { (inputNumber, previousAmount) ->
+                MainScreenAction.NewAmount(CurrencyAmount(inputNumber, previousAmount.currency))
+            }
     }
 
 
@@ -215,8 +229,9 @@ class MainScreenStateMachine @Inject constructor(
                                 currentAmount = amount,
                                 exchangeTable = table,
                                 displayItems = mainScreenListFactory.create(
-                                    table, amount
-                                )
+                                    table, amount, null
+                                ),
+                                scrollToFirst = false
                             )
                         } else {
                             state
@@ -232,14 +247,12 @@ class MainScreenStateMachine @Inject constructor(
                             MainScreenState.ErrorState(MainScreenError.NetworkConnectionError)
                         }
                     }
-                    is MainScreenAction.InitScreen -> state
                     else -> state
                 }
             }
             // Error
             is MainScreenState.ErrorState -> {
                 when (action) {
-                    is MainScreenAction.InitScreen -> MainScreenState.LoadingState
                     is MainScreenAction.Retry -> MainScreenState.LoadingState
                     is MainScreenAction.ConnectivityChanged -> {
                         if (!action.connection.isAvailable()) {
@@ -254,7 +267,6 @@ class MainScreenStateMachine @Inject constructor(
             // Display
             is MainScreenState.DisplayState -> {
                 when (action) {
-                    is MainScreenAction.InitScreen -> MainScreenState.LoadingState
                     is MainScreenAction.ConnectivityChanged -> {
                         if (!action.connection.isAvailable()) {
                             state.toErrorAndDisplayState(MainScreenError.NetworkConnectionError)
@@ -277,9 +289,26 @@ class MainScreenStateMachine @Inject constructor(
                             currentAmount = amount,
                             exchangeTable = table,
                             displayItems = mainScreenListFactory.create(
-                                table, amount
-                            )
+                                table, amount, state.getFreeInput()
+                            ),
+                            scrollToFirst = false
                         )
+                    }
+                    is MainScreenAction.NewInput -> {
+                        if (state.getFreeInput() != action.input) {
+                            state.copy(
+                                displayItems = state.displayItems.mapIndexed { index, currencyDisplayItem ->
+                                    if (index == 0) {
+                                        currencyDisplayItem.copy(freeInput = action.input)
+                                    } else {
+                                        currencyDisplayItem
+                                    }
+                                },
+                                scrollToFirst = false
+                            )
+                        } else {
+                            state
+                        }
                     }
                     is MainScreenAction.LoadNetworkTable -> state.toLoadingAndDisplayState()
                     is MainScreenAction.Error -> state.toErrorAndDisplayState(action.throwable.toError())
@@ -290,8 +319,9 @@ class MainScreenStateMachine @Inject constructor(
                                 currentAmount = action.amount,
                                 exchangeTable = state.exchangeTable,
                                 displayItems = mainScreenListFactory.create(
-                                    state.exchangeTable, action.amount
-                                )
+                                    state.exchangeTable, action.amount, state.getFreeInput()
+                                ),
+                                scrollToFirst = false
                             )
                         } else {
                             val table = state.exchangeTable.newTableFor(action.amount.currency)
@@ -304,8 +334,9 @@ class MainScreenStateMachine @Inject constructor(
                                 currentAmount = action.amount,
                                 exchangeTable = table,
                                 displayItems = mainScreenListFactory.create(
-                                    table, action.amount
-                                )
+                                    table, action.amount, null
+                                ),
+                                scrollToFirst = true
                             )
                         }
                     }
@@ -316,7 +347,6 @@ class MainScreenStateMachine @Inject constructor(
             // Load and display
             is MainScreenState.LoadAndDisplayState -> {
                 when (action) {
-                    is MainScreenAction.InitScreen -> MainScreenState.LoadingState
                     is MainScreenAction.ConnectivityChanged -> {
                         if (!action.connection.isAvailable()) {
                             state.toErrorAndDisplayState(MainScreenError.NetworkConnectionError)
@@ -339,9 +369,26 @@ class MainScreenStateMachine @Inject constructor(
                             currentAmount = amount,
                             exchangeTable = table,
                             displayItems = mainScreenListFactory.create(
-                                table, amount
-                            )
+                                table, amount, state.getFreeInput()
+                            ),
+                            scrollToFirst = false
                         )
+                    }
+                    is MainScreenAction.NewInput -> {
+                        if (state.getFreeInput() != action.input) {
+                            state.copy(
+                                displayItems = state.displayItems.mapIndexed { index, currencyDisplayItem ->
+                                    if (index == 0) {
+                                        currencyDisplayItem.copy(freeInput = action.input)
+                                    } else {
+                                        currencyDisplayItem
+                                    }
+                                },
+                                scrollToFirst = false
+                            )
+                        } else {
+                            state
+                        }
                     }
                     is MainScreenAction.NetworkTableLoaded -> state.toDisplayState()
                     is MainScreenAction.Error -> state.toErrorAndDisplayState(action.throwable.toError())
@@ -352,8 +399,9 @@ class MainScreenStateMachine @Inject constructor(
                                 currentAmount = action.amount,
                                 exchangeTable = state.exchangeTable,
                                 displayItems = mainScreenListFactory.create(
-                                    state.exchangeTable, action.amount
-                                )
+                                    state.exchangeTable, action.amount, state.getFreeInput()
+                                ),
+                                scrollToFirst = false
                             )
                         } else {
                             val table = state.exchangeTable.newTableFor(action.amount.currency)
@@ -366,8 +414,9 @@ class MainScreenStateMachine @Inject constructor(
                                 currentAmount = action.amount,
                                 exchangeTable = table,
                                 displayItems = mainScreenListFactory.create(
-                                    table, action.amount
-                                )
+                                    table, action.amount, state.getFreeInput()
+                                ),
+                                scrollToFirst = true
                             )
                         }
                     }
@@ -378,11 +427,13 @@ class MainScreenStateMachine @Inject constructor(
             // Error and display
             is MainScreenState.ErrorAndDisplayState -> {
                 when (action) {
-                    is MainScreenAction.InitScreen -> MainScreenState.LoadingState
                     is MainScreenAction.Retry -> state.toLoadingAndDisplayState()
                     is MainScreenAction.ConnectivityChanged -> {
                         if (!action.connection.isAvailable()) {
-                            state.copy(error = MainScreenError.NetworkConnectionError)
+                            state.copy(
+                                error = MainScreenError.NetworkConnectionError,
+                                scrollToFirst = false
+                            )
                         } else {
                             state
                         }
@@ -397,15 +448,33 @@ class MainScreenStateMachine @Inject constructor(
                                 IllegalStateException(
                                     "Error on converting table"
                                 )
-                            )
+                            ),
+                            scrollToFirst = false
                         )
                         state.copy(
                             currentAmount = amount,
                             exchangeTable = table,
                             displayItems = mainScreenListFactory.create(
-                                table, amount
-                            )
+                                table, amount, state.getFreeInput()
+                            ),
+                            scrollToFirst = false
                         )
+                    }
+                    is MainScreenAction.NewInput -> {
+                        if (state.getFreeInput() != action.input) {
+                            state.copy(
+                                displayItems = state.displayItems.mapIndexed { index, currencyDisplayItem ->
+                                    if (index == 0) {
+                                        currencyDisplayItem.copy(freeInput = action.input)
+                                    } else {
+                                        currencyDisplayItem
+                                    }
+                                },
+                                scrollToFirst = false
+                            )
+                        } else {
+                            state
+                        }
                     }
                     is MainScreenAction.Error -> state.copy(error = action.throwable.toError())
                     is MainScreenAction.NewAmount -> {
@@ -415,8 +484,9 @@ class MainScreenStateMachine @Inject constructor(
                                 currentAmount = action.amount,
                                 exchangeTable = state.exchangeTable,
                                 displayItems = mainScreenListFactory.create(
-                                    state.exchangeTable, action.amount
-                                )
+                                    state.exchangeTable, action.amount, state.getFreeInput()
+                                ),
+                                scrollToFirst = false
                             )
                         } else {
                             val table = state.exchangeTable.newTableFor(action.amount.currency)
@@ -429,8 +499,9 @@ class MainScreenStateMachine @Inject constructor(
                                 currentAmount = action.amount,
                                 exchangeTable = table,
                                 displayItems = mainScreenListFactory.create(
-                                    table, action.amount
-                                )
+                                    table, action.amount, null
+                                ),
+                                scrollToFirst = true
                             )
                         }
                     }

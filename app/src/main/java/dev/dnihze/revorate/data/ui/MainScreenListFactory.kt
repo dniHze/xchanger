@@ -14,7 +14,11 @@ class MainScreenListFactory @Inject constructor(
     private val nameMapper: DisplayCurrencyNameMapper
 ) {
 
-    fun create(table: ExchangeTable, amount: CurrencyAmount): List<CurrencyDisplayItem> {
+    fun create(
+        table: ExchangeTable,
+        amount: CurrencyAmount,
+        baseCurrencyFreeInputAmount: CharSequence?
+    ): List<CurrencyDisplayItem> {
         if (table.isEmpty()) {
             return emptyList()
         }
@@ -29,8 +33,15 @@ class MainScreenListFactory @Inject constructor(
         }
 
         return amountList.mapIndexed { index, currencyAmount ->
+            val displayAmount = displayAmountMapper.map(currencyAmount)
+            val freeInputAmount = if (currencyAmount.currency == baseCurrency) {
+                baseCurrencyFreeInputAmount ?: displayAmount
+            } else {
+                null
+            }
             CurrencyDisplayItem(
-                displayAmount = displayAmountMapper.map(currencyAmount),
+                displayAmount = displayAmount,
+                freeInput = freeInputAmount,
                 currencyFullNameId = nameMapper.map(currencyAmount.currency),
                 currencyFlagEmojiId = flagMapper.map(currencyAmount.currency),
                 amount = currencyAmount,

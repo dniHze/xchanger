@@ -7,6 +7,8 @@ private object Versions {
     const val emoji = "1.0.0"
     const val recyclerView = "1.1.0"
     const val lifecycle = "2.2.0"
+    const val material = "1.1.0"
+    const val insetter = "0.2.1"
 
     const val retrofit = "2.7.1"
     const val okHttp = "4.4.0"
@@ -38,12 +40,17 @@ object Dependencies {
     const val emoji = "androidx.emoji:emoji:${Versions.emoji}"
     const val emojiCompat = "androidx.emoji:emoji-appcompat:${Versions.emoji}"
 
+    const val material = "com.google.android.material:material:${Versions.material}"
+
     const val recyclerView = "androidx.recyclerview:recyclerview:${Versions.recyclerView}"
 
     const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.lifecycle}"
     const val liveData = "androidx.lifecycle:lifecycle-livedata-ktx:${Versions.lifecycle}"
     const val lifecycleProcess = "androidx.lifecycle:lifecycle-process:${Versions.lifecycle}"
     const val lifecycleCompiler  = "androidx.lifecycle:lifecycle-compiler:${Versions.lifecycle}"
+
+    const val insetter = "dev.chrisbanes:insetter:${Versions.insetter}"
+    const val insetterKTX = "dev.chrisbanes:insetter-ktx:${Versions.insetter}"
 
     const val retrofit = "com.squareup.retrofit2:retrofit:${Versions.retrofit}"
     const val retrofitRxJavaAdapter = "com.squareup.retrofit2:adapter-rxjava2:${Versions.retrofit}"

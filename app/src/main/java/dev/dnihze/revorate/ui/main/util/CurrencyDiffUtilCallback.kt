@@ -25,4 +25,13 @@ class CurrencyDiffUtilCallback(
                 old.amount.currency == new.amount.currency &&
                 old.inputEnabled == new.inputEnabled
     }
+
+    override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
+        val old = oldList[oldItemPosition]
+        val new = newList[newItemPosition]
+        if (new.inputEnabled && !old.inputEnabled) {
+            return RequestKeyboardPayload
+        }
+        return null
+    }
 }

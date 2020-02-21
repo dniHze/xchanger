@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/activity_content"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:orientation="vertical">
-
-  <androidx.appcompat.widget.Toolbar
-    android:id="@+id/toolbar"
-    android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
-    app:title="@string/toolbar_title"
-    app:titleMarginStart="72dp" />
 
   <FrameLayout
     android:layout_width="match_parent"
@@ -19,14 +13,35 @@
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/recycler_view"
       android:layout_width="match_parent"
-      android:layout_height="match_parent" />
+      android:layout_height="match_parent"
+      android:clipToPadding="false"
+      android:paddingTop="?attr/actionBarSize" />
 
-    <ProgressBar
-      android:id="@+id/progress_bar"
-      android:layout_width="48dp"
-      android:layout_height="48dp"
-      android:visibility="gone"
-      android:layout_gravity="center"/>
+    <include
+      android:id="@+id/empty_view"
+      layout="@layout/empty_view"
+      android:visibility="gone" />
+
+    <include
+      android:id="@+id/progress_view"
+      layout="@layout/progress_view"
+      android:visibility="gone" />
+
   </FrameLayout>
 
-</LinearLayout>
+  <FrameLayout
+    android:id="@+id/top_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/toolbar_color">
+
+    <androidx.appcompat.widget.Toolbar
+      android:id="@+id/toolbar"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize"
+      app:title="@string/toolbar_title"
+      app:titleMarginStart="72dp" />
+
+  </FrameLayout>
+
+</FrameLayout>
