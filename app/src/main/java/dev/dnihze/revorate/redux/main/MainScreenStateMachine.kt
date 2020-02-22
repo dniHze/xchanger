@@ -203,7 +203,7 @@ class MainScreenStateMachine @Inject constructor(
                 inputNumber to input.previousAmount
             }
             .filter { (inputNumber, previousAmount) ->
-                inputNumber != previousAmount.amount
+                inputNumber != previousAmount.amount && previousAmount.currency == state().getCurrentCurrency()
             }
             .map { (inputNumber, previousAmount) ->
                 MainScreenAction.NewAmount(CurrencyAmount(inputNumber, previousAmount.currency))
@@ -295,7 +295,8 @@ class MainScreenStateMachine @Inject constructor(
                         )
                     }
                     is MainScreenAction.NewInput -> {
-                        if (state.getFreeInput() != action.input) {
+                        if (state.getFreeInput() != action.input &&
+                            state.currentAmount.currency == action.previousAmount.currency) {
                             state.copy(
                                 displayItems = state.displayItems.mapIndexed { index, currencyDisplayItem ->
                                     if (index == 0) {
@@ -375,7 +376,8 @@ class MainScreenStateMachine @Inject constructor(
                         )
                     }
                     is MainScreenAction.NewInput -> {
-                        if (state.getFreeInput() != action.input) {
+                        if (state.getFreeInput() != action.input &&
+                            state.currentAmount.currency == action.previousAmount.currency) {
                             state.copy(
                                 displayItems = state.displayItems.mapIndexed { index, currencyDisplayItem ->
                                     if (index == 0) {
@@ -414,7 +416,7 @@ class MainScreenStateMachine @Inject constructor(
                                 currentAmount = action.amount,
                                 exchangeTable = table,
                                 displayItems = mainScreenListFactory.create(
-                                    table, action.amount, state.getFreeInput()
+                                    table, action.amount, null
                                 ),
                                 scrollToFirst = true
                             )
@@ -461,7 +463,8 @@ class MainScreenStateMachine @Inject constructor(
                         )
                     }
                     is MainScreenAction.NewInput -> {
-                        if (state.getFreeInput() != action.input) {
+                        if (state.getFreeInput() != action.input &&
+                            state.currentAmount.currency == action.previousAmount.currency) {
                             state.copy(
                                 displayItems = state.displayItems.mapIndexed { index, currencyDisplayItem ->
                                     if (index == 0) {

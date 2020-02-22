@@ -1,7 +1,8 @@
-package dev.dnihze.revorate.ui.main.util
+package dev.dnihze.revorate.ui.main.adapter.diffutil
 
 import androidx.recyclerview.widget.DiffUtil
 import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
+import dev.dnihze.revorate.ui.main.adapter.diffutil.RequestKeyboardPayload
 
 class CurrencyDiffUtilCallback(
     private val oldList: List<CurrencyDisplayItem>,

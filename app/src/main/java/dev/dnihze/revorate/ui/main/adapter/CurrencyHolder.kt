@@ -3,16 +3,14 @@ package dev.dnihze.revorate.ui.main.adapter
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.appcompat.widget.AppCompatEditText
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.postDelayed
 import androidx.core.widget.addTextChangedListener
-import androidx.emoji.widget.EmojiAppCompatTextView
 import androidx.recyclerview.widget.RecyclerView
 import dev.dnihze.revorate.R
 import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
-import dev.dnihze.revorate.ui.main.util.AdapterActionsDelegate
-import dev.dnihze.revorate.ui.main.util.RequestKeyboardPayload
+import dev.dnihze.revorate.ui.main.adapter.binding.CurrencyListItemBinding
+import dev.dnihze.revorate.ui.main.delegate.AdapterActionsDelegate
+import dev.dnihze.revorate.ui.main.adapter.diffutil.RequestKeyboardPayload
 import dev.dnihze.revorate.utils.ext.showKeyboard
 
 class CurrencyHolder(
@@ -23,12 +21,7 @@ class CurrencyHolder(
     LayoutInflater.from(parent.context).inflate(R.layout.currency_list_item, parent, false)
 ) {
 
-    private val emoji: EmojiAppCompatTextView = itemView.findViewById(R.id.emoji_text_view)
-
-    private val title: AppCompatTextView = itemView.findViewById(R.id.title)
-    private val subtitle: AppCompatTextView = itemView.findViewById(R.id.subtitle)
-
-    private val input: AppCompatEditText = itemView.findViewById(R.id.input)
+    private val viewBinding = CurrencyListItemBinding(itemView)
 
     private val adapterData: CurrencyDisplayItem
         get() {
@@ -42,16 +35,16 @@ class CurrencyHolder(
             if (!adapterData.inputEnabled) {
                 delegate.onNewCurrency(adapterData.amount)
                 itemView.postDelayed(20L) {
-                    input.showKeyboard()
+                    viewBinding.input.showKeyboard()
                 }
             } else {
                 itemView.post {
-                    input.showKeyboard()
+                    viewBinding.input.showKeyboard()
                 }
             }
         }
 
-        input.addTextChangedListener(onTextChanged = { text, _, _, _ ->
+        viewBinding.input.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             if (!isAdapterPositionValid()) return@addTextChangedListener
             val data = adapterData
             if (data.inputEnabled) {
@@ -62,25 +55,25 @@ class CurrencyHolder(
 
     fun bind() {
         val data = adapterData
-        title.text = data.amount.currency.isoName
+        viewBinding.title.text = data.amount.currency.isoName
 
-        emoji.setText(data.currencyFlagEmojiId)
-        subtitle.setText(data.currencyFullNameId)
+        viewBinding.emoji.setText(data.currencyFlagEmojiId)
+        viewBinding.subtitle.setText(data.currencyFullNameId)
 
         if (!data.inputEnabled) {
-            input.setText(data.displayAmount)
-            input.setSelection(data.displayAmount.length)
-        } else if (data.freeInput != null && data.freeInput != (input.text?.toString() ?: "")) {
-            input.setText(data.freeInput)
-            input.setSelection(data.freeInput.length)
+            viewBinding.input.setText(data.displayAmount)
+            viewBinding.input.setSelection(data.displayAmount.length)
+        } else if (data.freeInput != null && data.freeInput != (viewBinding.input.text?.toString() ?: "")) {
+            viewBinding.input.setText(data.freeInput)
+            viewBinding.input.setSelection(data.freeInput.length)
         }
 
-        input.isEnabled = data.inputEnabled
+        viewBinding.input.isEnabled = data.inputEnabled
 
-        if (data.amount.currency.digitsAfterSeparator != 0 && input.inputType != FLAG_DECIMAL_NUMBER) {
-            input.inputType = FLAG_DECIMAL_NUMBER
-        } else if (data.amount.currency.digitsAfterSeparator == 0 && input.inputType != FLAG_NUMBER) {
-            input.inputType = FLAG_NUMBER
+        if (data.amount.currency.digitsAfterSeparator != 0 && viewBinding.input.inputType != FLAG_DECIMAL_NUMBER) {
+            viewBinding.input.inputType = FLAG_DECIMAL_NUMBER
+        } else if (data.amount.currency.digitsAfterSeparator == 0 && viewBinding.input.inputType != FLAG_NUMBER) {
+            viewBinding.input.inputType = FLAG_NUMBER
         }
     }
 
@@ -90,7 +83,7 @@ class CurrencyHolder(
         val payload = payloads.firstOrNull() as? RequestKeyboardPayload
         if (payload != null) {
             itemView.post {
-                input.showKeyboard()
+                viewBinding.input.showKeyboard()
             }
         }
     }

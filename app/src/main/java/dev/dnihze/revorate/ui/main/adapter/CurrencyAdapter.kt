@@ -3,7 +3,7 @@ package dev.dnihze.revorate.ui.main.adapter
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
-import dev.dnihze.revorate.ui.main.util.AdapterActionsDelegate
+import dev.dnihze.revorate.ui.main.delegate.AdapterActionsDelegate
 
 class CurrencyAdapter(
     private val delegate: AdapterActionsDelegate

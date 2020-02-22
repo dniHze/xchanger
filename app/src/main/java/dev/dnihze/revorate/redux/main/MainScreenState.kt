@@ -1,5 +1,6 @@
 package dev.dnihze.revorate.redux.main
 
+import dev.dnihze.revorate.model.Currency
 import dev.dnihze.revorate.model.CurrencyAmount
 import dev.dnihze.revorate.model.ExchangeTable
 import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
@@ -112,6 +113,15 @@ sealed class MainScreenState {
 
     fun isErrorState(): Boolean = this is ErrorState || this is ErrorAndDisplayState
     fun isLoadingState(): Boolean = this is LoadingState || this is LoadAndDisplayState
+
+    fun getCurrentCurrency(): Currency? {
+        return when (this) {
+            is DisplayState -> currentAmount.currency
+            is LoadAndDisplayState -> currentAmount.currency
+            is ErrorAndDisplayState -> currentAmount.currency
+            else -> null
+        }
+    }
 
     fun exchangeTable(): ExchangeTable? {
         return when (this) {

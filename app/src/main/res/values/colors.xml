@@ -10,7 +10,7 @@
   <color name="status_bar_color">#33000000</color>
   <color name="nav_bar_color">#33000000</color>
 
-  <color name="toolbar_color">#B3FFFFFF</color>
+  <color name="toolbar_color">#D9FFFFFF</color>
 
   <color name="background_color">@android:color/white</color>
 

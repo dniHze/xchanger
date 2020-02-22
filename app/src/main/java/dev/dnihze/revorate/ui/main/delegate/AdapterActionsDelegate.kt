@@ -1,4 +1,4 @@
-package dev.dnihze.revorate.ui.main.util
+package dev.dnihze.revorate.ui.main.delegate
 
 import dev.dnihze.revorate.model.CurrencyAmount
 

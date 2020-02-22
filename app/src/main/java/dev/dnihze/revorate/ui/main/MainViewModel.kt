@@ -9,7 +9,7 @@ import dev.dnihze.revorate.model.CurrencyAmount
 import dev.dnihze.revorate.redux.main.MainScreenAction
 import dev.dnihze.revorate.redux.main.MainScreenState
 import dev.dnihze.revorate.redux.main.MainScreenStateMachine
-import dev.dnihze.revorate.ui.main.util.AdapterActionsDelegate
+import dev.dnihze.revorate.ui.main.delegate.AdapterActionsDelegate
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Consumer

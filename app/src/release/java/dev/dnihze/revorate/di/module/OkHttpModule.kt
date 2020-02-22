@@ -3,7 +3,6 @@ package dev.dnihze.revorate.di.module
 import dagger.Module
 import dagger.Provides
 import okhttp3.Interceptor
-import timber.log.Timber
 import javax.inject.Named
 
 @Module
@@ -31,6 +30,6 @@ object OkHttpModule {
     @Provides
     @Named(NetworkModule.NETWORK_INTERCEPTORS)
     fun provideNetworkInterceptors(): List<Interceptor> {
-        return listOf(StethoInterceptor())
+        return listOf()
     }
 }
