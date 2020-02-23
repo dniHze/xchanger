@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity() {
             adapter = currencyAdapter
             layoutManager = linearLayoutManager
             (itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
-
+            setHasFixedSize(true)
             val scrollThreshold = resources.getDimension(R.dimen.keyboard_dismiss_threshold)
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 private var hasSeenFirstItem = true

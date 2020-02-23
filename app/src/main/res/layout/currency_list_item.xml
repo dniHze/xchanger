@@ -2,15 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
-  android:layout_height="wrap_content"
+  android:layout_height="72dp"
   android:background="?attr/selectableItemBackground"
-  android:minHeight="72dp"
   android:orientation="horizontal"
   android:paddingStart="16dp"
   android:paddingTop="16dp"
   android:paddingEnd="16dp"
   android:paddingBottom="12dp">
-
 
   <androidx.emoji.widget.EmojiAppCompatTextView
     android:id="@+id/emoji_text_view"
@@ -19,6 +17,7 @@
     android:layout_gravity="center_vertical"
     android:gravity="center"
     android:minHeight="40dp"
+    android:singleLine="true"
     android:textAlignment="center"
     android:textColor="@android:color/black"
     android:textSize="30sp"
@@ -47,19 +46,22 @@
       tools:text="US Dollar" />
   </LinearLayout>
 
-  <Space
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    android:layout_weight="1" />
+  <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
-  <androidx.appcompat.widget.AppCompatEditText
-    android:id="@+id/input"
-    style="@style/TextStyle.EditField"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:descendantFocusability="beforeDescendants"
-    android:focusableInTouchMode="true"
-    android:hint="@string/zero"
-    android:imeOptions="actionDone"
-    tools:text="1183.06" />
+    <androidx.appcompat.widget.AppCompatEditText
+      android:id="@+id/input"
+      style="@style/TextStyle.EditField"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="end|center_vertical"
+      android:descendantFocusability="beforeDescendants"
+      android:focusableInTouchMode="true"
+      android:hint="@string/zero"
+      android:imeOptions="actionDone"
+      tools:text="1183.06" />
+  </FrameLayout>
+
+
 </LinearLayout>
