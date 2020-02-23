@@ -16,8 +16,10 @@ import dev.dnihze.revorate.model.lifecycle.AppState
 import dev.dnihze.revorate.model.network.exception.ApiException
 import dev.dnihze.revorate.ui.main.navigation.NetworkSettingsScreen
 import dev.dnihze.revorate.utils.ext.retryWithExponentialBackoff
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.functions.Function
 import io.reactivex.schedulers.Schedulers
 import ru.terrakok.cicerone.Router
 import timber.log.Timber
@@ -166,24 +168,24 @@ class MainScreenStateMachine @Inject constructor(
     ): Observable<MainScreenAction> {
         return actions.ofType(MainScreenAction.NewAmount::class.java)
             .distinctUntilChanged()
-            .switchMap { currencySelected ->
-                localDataSource.getLocalExchangeTable()
+            .switchMapMaybe { currencySelected ->
+                localDataSource.getSingleExchangeTable()
                     .subscribeOn(Schedulers.io())
                     .map { table -> table to currencySelected.amount }
-            }
-            .filter { (table, amount) -> !table.isEmpty() && table.baseCurrency != amount.currency }
-            .switchMapSingle { (table, amount) ->
-                localDataSource.saveExchangeTable(
-                    table.newTableFor(amount.currency)
-                        ?: throw IllegalStateException("Can't be created.")
-                ).subscribeOn(Schedulers.io())
-                    .andThen(Single.fromCallable {
-                        if (state().isErrorState()) {
-                            MainScreenAction.Retry
-                        } else {
-                            MainScreenAction.LoadNetworkTable
-                        }
-                    })
+                    .filter { (table, amount) -> !table.isEmpty() && table.baseCurrency != amount.currency }
+                    .flatMapSingleElement { (table, amount) ->
+                        localDataSource.saveExchangeTable(
+                            table.newTableFor(amount.currency)
+                                ?: throw IllegalStateException("Can't be created.")
+                        ).andThen(Single.fromCallable {
+                            if (state().isErrorState()) {
+                                MainScreenAction.Retry
+                            } else {
+                                MainScreenAction.LoadNetworkTable
+                            }
+                        })
+                    }
+                    .onErrorResumeNext(Function { t -> Maybe.just(MainScreenAction.Error(t))})
             }
     }
 
