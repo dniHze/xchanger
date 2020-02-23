@@ -2,6 +2,7 @@
   <string name="app_name">XChanger</string>
 
   <string name="all_error_retry">Retry</string>
+  <string name="all_error_settings">Open settings</string>
   <string name="all_error_oops">Oops… Something wen\'t wrong.</string>
   <string name="all_error_no_internet">No Internet connection.</string>
 

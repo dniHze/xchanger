@@ -18,15 +18,19 @@ import dev.dnihze.revorate.redux.main.MainScreenState
 import dev.dnihze.revorate.ui.main.adapter.CurrencyAdapter
 import dev.dnihze.revorate.ui.main.binding.MainActivityViewBinding
 import dev.dnihze.revorate.ui.main.adapter.diffutil.CurrencyDiffUtilCallback
+import dev.dnihze.revorate.ui.main.navigation.ActivityNavigator
 import dev.dnihze.revorate.ui.main.util.SnackBarHelper
 import dev.dnihze.revorate.utils.ext.hideKeyboard
 import dev.dnihze.revorate.utils.ext.injectViewModel
+import ru.terrakok.cicerone.NavigatorHolder
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var navigatorHolder: NavigatorHolder
 
     private lateinit var viewModel: MainViewModel
 
@@ -35,6 +39,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var currencyAdapter: CurrencyAdapter
     private lateinit var linearLayoutManager: LinearLayoutManager
+
+    private val navigator by lazy(LazyThreadSafetyMode.NONE) { ActivityNavigator(this) }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +52,16 @@ class MainActivity : AppCompatActivity() {
         snackBarHelper = SnackBarHelper(viewBinding)
 
         bindViewModel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        navigatorHolder.setNavigator(navigator)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        navigatorHolder.removeNavigator()
     }
 
 
@@ -67,7 +83,7 @@ class MainActivity : AppCompatActivity() {
                     when (val error = state.error) {
                         is MainScreenError.NetworkConnectionError -> {
                             viewBinding.errorView.setNoNetworkConnection(View.OnClickListener {
-                                viewModel.input.accept(MainScreenAction.Retry)
+                                viewModel.input.accept(MainScreenAction.NetworkSettings)
                             })
                         }
                         is MainScreenError.ApiError -> {
@@ -79,7 +95,7 @@ class MainActivity : AppCompatActivity() {
                                         viewModel.input.accept(MainScreenAction.Retry)
                                     })
                                 e.isIOException() -> viewBinding.errorView.setNoNetworkConnection(View.OnClickListener {
-                                    viewModel.input.accept(MainScreenAction.Retry)
+                                    viewModel.input.accept(MainScreenAction.NetworkSettings)
                                 })
                                 else -> viewBinding.errorView.setUnknown(e.cause, View.OnClickListener {
                                     viewModel.input.accept(MainScreenAction.Retry)
@@ -101,35 +117,10 @@ class MainActivity : AppCompatActivity() {
                     viewBinding.progressView.hide()
                     viewBinding.errorView.hide()
 
-                    snackBarHelper.hide()
-
-                    setDataToAdapter(state.displayItems)
-
-                    if (state.scrollToFirst) {
-                        scrollToStart()
-                    }
-
-                }
-                is MainScreenState.LoadAndDisplayState -> {
-                    viewBinding.progressView.hide()
-                    viewBinding.errorView.hide()
-
-                    snackBarHelper.hide()
-
-                    setDataToAdapter(state.displayItems)
-
-                    if (state.scrollToFirst) {
-                        scrollToStart()
-                    }
-                }
-                is MainScreenState.ErrorAndDisplayState -> {
-                    viewBinding.progressView.hide()
-                    viewBinding.errorView.hide()
-
                     when (val error = state.error) {
                         is MainScreenError.NetworkConnectionError -> {
                             snackBarHelper.setNoNetworkConnection(View.OnClickListener {
-                                viewModel.input.accept(MainScreenAction.Retry)
+                                viewModel.input.accept(MainScreenAction.NetworkSettings)
                             })
                         }
                         is MainScreenError.ApiError -> {
@@ -140,7 +131,7 @@ class MainActivity : AppCompatActivity() {
 
                                 })
                                 e.isIOException() -> snackBarHelper.setNoNetworkConnection(View.OnClickListener {
-                                    viewModel.input.accept(MainScreenAction.Retry)
+                                    viewModel.input.accept(MainScreenAction.NetworkSettings)
                                 })
                                 else -> snackBarHelper.setUnknownError(View.OnClickListener {
                                     viewModel.input.accept(MainScreenAction.Retry)
@@ -150,6 +141,8 @@ class MainActivity : AppCompatActivity() {
                         is MainScreenError.Unknown -> snackBarHelper.setUnknownError(View.OnClickListener {
                             viewModel.input.accept(MainScreenAction.Retry)
                         })
+                        else -> snackBarHelper.hide()
+
                     }
 
                     setDataToAdapter(state.displayItems)
@@ -157,6 +150,7 @@ class MainActivity : AppCompatActivity() {
                     if (state.scrollToFirst) {
                         scrollToStart()
                     }
+
                 }
             }
         })

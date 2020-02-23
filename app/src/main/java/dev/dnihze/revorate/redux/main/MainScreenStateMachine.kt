@@ -14,10 +14,12 @@ import dev.dnihze.revorate.model.CurrencyAmount
 import dev.dnihze.revorate.model.ExchangeTable
 import dev.dnihze.revorate.model.lifecycle.AppState
 import dev.dnihze.revorate.model.network.exception.ApiException
+import dev.dnihze.revorate.ui.main.navigation.NetworkSettingsScreen
 import dev.dnihze.revorate.utils.ext.retryWithExponentialBackoff
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import ru.terrakok.cicerone.Router
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -27,7 +29,8 @@ class MainScreenStateMachine @Inject constructor(
     private val localDataSource: LocalDataSource,
     private val mainScreenListFactory: MainScreenListFactory,
     private val connectionWatcher: ConnectionWatcher,
-    private val appStateObserver: AppStateObserver
+    private val appStateObserver: AppStateObserver,
+    private val router: Router
 ) {
 
     private val tag: String
@@ -40,7 +43,7 @@ class MainScreenStateMachine @Inject constructor(
             Timber.tag(tag).i("New input action -> $it")
         }
         .reduxStore(
-            initialState = MainScreenState.LoadingState,
+            initialState = MainScreenState.LoadingState(),
             reducer = ::reducer,
             sideEffects = listOf(
                 ::networkLoadSideEffect,
@@ -50,7 +53,8 @@ class MainScreenStateMachine @Inject constructor(
                 ::connectivitySideEffect,
                 ::currencyChangedSideEffect,
                 ::retrySideEffect,
-                ::newInputSideEffect
+                ::newInputSideEffect,
+                ::openNetworkSettingSideEffect
             )
         )
         .distinctUntilChanged()
@@ -210,6 +214,18 @@ class MainScreenStateMachine @Inject constructor(
             }
     }
 
+    private fun openNetworkSettingSideEffect(
+        actions: Observable<MainScreenAction>,
+        state: StateAccessor<MainScreenState>
+    ): Observable<MainScreenAction> {
+        return actions.ofType(MainScreenAction.NetworkSettings::class.java)
+            .switchMap {
+                router.navigateTo(NetworkSettingsScreen())
+                Observable.timer(2L, TimeUnit.SECONDS)
+                    .map { MainScreenAction.Retry as MainScreenAction }
+            }
+    }
+
 
     private fun reducer(state: MainScreenState, action: MainScreenAction): MainScreenState {
         Timber.tag(tag).i("State: $state;\nAction: $action;")
@@ -218,20 +234,22 @@ class MainScreenStateMachine @Inject constructor(
             is MainScreenState.LoadingState -> {
                 when (action) {
                     is MainScreenAction.LoadNetworkTable -> {
-                        state
+                        state.copy(loaded = true)
                     }
                     is MainScreenAction.LocalDBTableLoaded -> {
                         val table = action.exchangeTable.order()
                         val currency = table.baseCurrency
                         if (currency != null) {
                             val amount = CurrencyAmount(1.0, currency)
-                            MainScreenState.LoadAndDisplayState(
+                            MainScreenState.DisplayState(
                                 currentAmount = amount,
                                 exchangeTable = table,
                                 displayItems = mainScreenListFactory.create(
                                     table, amount, null
                                 ),
-                                scrollToFirst = false
+                                scrollToFirst = false,
+                                loading = !state.loaded,
+                                error = null
                             )
                         } else {
                             state
@@ -253,7 +271,7 @@ class MainScreenStateMachine @Inject constructor(
             // Error
             is MainScreenState.ErrorState -> {
                 when (action) {
-                    is MainScreenAction.Retry -> MainScreenState.LoadingState
+                    is MainScreenAction.Retry -> MainScreenState.LoadingState()
                     is MainScreenAction.ConnectivityChanged -> {
                         if (!action.connection.isAvailable()) {
                             MainScreenState.ErrorState(MainScreenError.NetworkConnectionError)
@@ -269,7 +287,7 @@ class MainScreenStateMachine @Inject constructor(
                 when (action) {
                     is MainScreenAction.ConnectivityChanged -> {
                         if (!action.connection.isAvailable()) {
-                            state.toErrorAndDisplayState(MainScreenError.NetworkConnectionError)
+                            state.toErrorState(MainScreenError.NetworkConnectionError)
                         } else {
                             state
                         }
@@ -278,7 +296,7 @@ class MainScreenStateMachine @Inject constructor(
                         val amount = state.currentAmount
                         val table = action.exchangeTable.order().newTableFor(
                             amount.currency
-                        ) ?: return state.toErrorAndDisplayState(
+                        ) ?: return state.toErrorState(
                             MainScreenError.Unknown(
                                 IllegalStateException(
                                     "Error on converting table"
@@ -294,6 +312,7 @@ class MainScreenStateMachine @Inject constructor(
                             scrollToFirst = false
                         )
                     }
+                    is MainScreenAction.Retry -> state.toLoadingState()
                     is MainScreenAction.NewInput -> {
                         if (state.getFreeInput() != action.input &&
                             state.currentAmount.currency == action.previousAmount.currency) {
@@ -311,89 +330,16 @@ class MainScreenStateMachine @Inject constructor(
                             state
                         }
                     }
-                    is MainScreenAction.LoadNetworkTable -> state.toLoadingAndDisplayState()
-                    is MainScreenAction.Error -> state.toErrorAndDisplayState(action.throwable.toError())
-                    is MainScreenAction.NewAmount -> {
-                        if (action.amount.currency == state.currentAmount.currency) {
-                            // Currency is same, just recalculate
-                            state.copy(
-                                currentAmount = action.amount,
-                                exchangeTable = state.exchangeTable,
-                                displayItems = mainScreenListFactory.create(
-                                    state.exchangeTable, action.amount, state.getFreeInput()
-                                ),
-                                scrollToFirst = false
-                            )
-                        } else {
-                            val table = state.exchangeTable.newTableFor(action.amount.currency)
-                                ?: return state.toErrorAndDisplayState(
-                                    MainScreenError.Unknown(
-                                        IllegalStateException("Error on converting table")
-                                    )
-                                )
-                            state.copy(
-                                currentAmount = action.amount,
-                                exchangeTable = table,
-                                displayItems = mainScreenListFactory.create(
-                                    table, action.amount, null
-                                ),
-                                scrollToFirst = true
-                            )
-                        }
-                    }
-                    else -> state
-                }
-            }
-
-            // Load and display
-            is MainScreenState.LoadAndDisplayState -> {
-                when (action) {
-                    is MainScreenAction.ConnectivityChanged -> {
-                        if (!action.connection.isAvailable()) {
-                            state.toErrorAndDisplayState(MainScreenError.NetworkConnectionError)
-                        } else {
-                            state
-                        }
-                    }
-                    is MainScreenAction.LocalDBTableLoaded -> {
-                        val amount = state.currentAmount
-                        val table = action.exchangeTable.order().newTableFor(
-                            amount.currency
-                        ) ?: return state.toErrorAndDisplayState(
-                            MainScreenError.Unknown(
-                                IllegalStateException(
-                                    "Error on converting table"
-                                )
-                            )
-                        )
-                        state.copy(
-                            currentAmount = amount,
-                            exchangeTable = table,
-                            displayItems = mainScreenListFactory.create(
-                                table, amount, state.getFreeInput()
-                            ),
-                            scrollToFirst = false
-                        )
-                    }
-                    is MainScreenAction.NewInput -> {
-                        if (state.getFreeInput() != action.input &&
-                            state.currentAmount.currency == action.previousAmount.currency) {
-                            state.copy(
-                                displayItems = state.displayItems.mapIndexed { index, currencyDisplayItem ->
-                                    if (index == 0) {
-                                        currencyDisplayItem.copy(freeInput = action.input)
-                                    } else {
-                                        currencyDisplayItem
-                                    }
-                                },
-                                scrollToFirst = false
-                            )
-                        } else {
-                            state
-                        }
-                    }
+                    is MainScreenAction.LoadNetworkTable -> state.toLoadingState()
                     is MainScreenAction.NetworkTableLoaded -> state.toDisplayState()
-                    is MainScreenAction.Error -> state.toErrorAndDisplayState(action.throwable.toError())
+                    is MainScreenAction.Error -> {
+                        val error = action.throwable.toError()
+                        if (error is MainScreenError.Unknown) {
+                            MainScreenState.ErrorState(error)
+                        } else {
+                            state.toErrorState(action.throwable.toError())
+                        }
+                    }
                     is MainScreenAction.NewAmount -> {
                         if (action.amount.currency == state.currentAmount.currency) {
                             // Currency is same, just recalculate
@@ -407,94 +353,8 @@ class MainScreenStateMachine @Inject constructor(
                             )
                         } else {
                             val table = state.exchangeTable.newTableFor(action.amount.currency)
-                                ?: return state.toErrorAndDisplayState(
+                                ?: return state.toErrorState(
                                     MainScreenError.Unknown(
-                                        IllegalStateException("Error on converting table")
-                                    )
-                                )
-                            state.copy(
-                                currentAmount = action.amount,
-                                exchangeTable = table,
-                                displayItems = mainScreenListFactory.create(
-                                    table, action.amount, null
-                                ),
-                                scrollToFirst = true
-                            )
-                        }
-                    }
-                    else -> state
-                }
-            }
-
-            // Error and display
-            is MainScreenState.ErrorAndDisplayState -> {
-                when (action) {
-                    is MainScreenAction.Retry -> state.toLoadingAndDisplayState()
-                    is MainScreenAction.ConnectivityChanged -> {
-                        if (!action.connection.isAvailable()) {
-                            state.copy(
-                                error = MainScreenError.NetworkConnectionError,
-                                scrollToFirst = false
-                            )
-                        } else {
-                            state
-                        }
-                    }
-
-                    is MainScreenAction.LocalDBTableLoaded -> {
-                        val amount = state.currentAmount
-                        val table = action.exchangeTable.order().newTableFor(
-                            amount.currency
-                        ) ?: return state.copy(
-                            error = MainScreenError.Unknown(
-                                IllegalStateException(
-                                    "Error on converting table"
-                                )
-                            ),
-                            scrollToFirst = false
-                        )
-                        state.copy(
-                            currentAmount = amount,
-                            exchangeTable = table,
-                            displayItems = mainScreenListFactory.create(
-                                table, amount, state.getFreeInput()
-                            ),
-                            scrollToFirst = false
-                        )
-                    }
-                    is MainScreenAction.NewInput -> {
-                        if (state.getFreeInput() != action.input &&
-                            state.currentAmount.currency == action.previousAmount.currency) {
-                            state.copy(
-                                displayItems = state.displayItems.mapIndexed { index, currencyDisplayItem ->
-                                    if (index == 0) {
-                                        currencyDisplayItem.copy(freeInput = action.input)
-                                    } else {
-                                        currencyDisplayItem
-                                    }
-                                },
-                                scrollToFirst = false
-                            )
-                        } else {
-                            state
-                        }
-                    }
-                    is MainScreenAction.Error -> state.copy(error = action.throwable.toError())
-                    is MainScreenAction.NewAmount -> {
-                        if (action.amount.currency == state.currentAmount.currency) {
-                            // Currency is same, just recalculate
-                            state.copy(
-                                currentAmount = action.amount,
-                                exchangeTable = state.exchangeTable,
-                                displayItems = mainScreenListFactory.create(
-                                    state.exchangeTable, action.amount, state.getFreeInput()
-                                ),
-                                scrollToFirst = false
-                            )
-                        } else {
-                            val table = state.exchangeTable.newTableFor(action.amount.currency)
-                                ?: return state.copy(
-                                    error = MainScreenError.Unknown(
                                         IllegalStateException("Error on converting table")
                                     )
                                 )

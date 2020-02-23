@@ -18,7 +18,8 @@ import javax.inject.Singleton
         DevModule::class,
         DBModule::class,
         ViewModelModule::class,
-        LifecycleModule::class
+        LifecycleModule::class,
+        NavigationModule::class
     ]
 )
 @Singleton

@@ -16,7 +16,7 @@ class SnackBarHelper(
         hide()
 
         snackBar = Snackbar.make(viewBinding.container, R.string.all_error_no_internet, Snackbar.LENGTH_INDEFINITE)
-            .setAction(R.string.all_error_retry, listener)
+            .setAction(R.string.all_error_no_internet, listener)
         snackBar?.show()
     }
 

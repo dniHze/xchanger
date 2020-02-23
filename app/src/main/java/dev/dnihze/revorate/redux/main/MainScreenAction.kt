@@ -26,4 +26,6 @@ sealed class MainScreenAction {
     data class Error(val throwable: Throwable) : MainScreenAction()
 
     object Retry : MainScreenAction()
+
+    object NetworkSettings: MainScreenAction()
 }

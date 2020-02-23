@@ -86,10 +86,12 @@ dependencies {
 
     implementation Dependencies.okHttp
 
+    implementation Dependencies.cicerone
     implementation Dependencies.timber
 
     debugImplementation Dependencies.stetho
     debugImplementation Dependencies.stehoInterceptor
+    debugImplementation Dependencies.leakcanary
     debugImplementation Dependencies.okHttpLoggingInterceptor
 
     testImplementation TestDependencies.junit

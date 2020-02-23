@@ -25,7 +25,7 @@ class ErrorViewBinding(
             contentDescription = container.context.getString(R.string.content_description_network)
         }
         actionButton.apply {
-            setText(R.string.all_error_retry)
+            setText(R.string.all_error_no_internet)
             setOnClickListener(callback)
         }
     }

@@ -19,9 +19,11 @@ private object Versions {
     const val room = "2.2.3"
     const val rxRedux = "1.0.1"
     const val rxRelay = "2.1.1"
+    const val cicerone = "5.1.0"
     // Utils
     const val timber = "4.7.1"
     const val stetho = "1.5.1"
+    const val leakcanary = "2.2"
 
     // Test libs
     const val junit = "4.12"
@@ -79,6 +81,10 @@ object Dependencies {
     const val moshi = "com.squareup.moshi:moshi:${Versions.moshi}"
     const val moshiKotlin = "com.squareup.moshi:moshi-kotlin:${Versions.moshi}"
     const val moshiCodegen = "com.squareup.moshi:moshi-kotlin-codegen:${Versions.moshi}"
+
+    const val cicerone = "ru.terrakok.cicerone:cicerone:${Versions.cicerone}"
+
+    const val leakcanary = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanary}"
 
     const val timber = "com.jakewharton.timber:timber:${Versions.timber}"
 }

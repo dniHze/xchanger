@@ -7,75 +7,45 @@ import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
 
 sealed class MainScreenState {
 
-    object LoadingState : MainScreenState() {
-        override fun toString(): String {
-            return "LoadingState"
-        }
-    }
+    data class LoadingState(val loaded: Boolean = false) : MainScreenState()
 
     data class DisplayState(
         val currentAmount: CurrencyAmount,
         val exchangeTable: ExchangeTable,
         val displayItems: List<CurrencyDisplayItem>,
-        val scrollToFirst: Boolean
+        val scrollToFirst: Boolean,
+        val loading: Boolean,
+        val error: MainScreenError?
     ) : MainScreenState() {
 
-        fun toErrorAndDisplayState(error: MainScreenError): ErrorAndDisplayState {
-            return ErrorAndDisplayState(
-                currentAmount,
-                exchangeTable,
-                displayItems,
-                error,
-                false
+        fun toErrorState(error: MainScreenError): DisplayState {
+            return copy(
+                scrollToFirst = false,
+                loading = false,
+                error = error
             )
         }
 
-        fun toLoadingAndDisplayState(): LoadAndDisplayState {
-            return LoadAndDisplayState(
-                currentAmount,
-                exchangeTable,
-                displayItems,
-                false
-            )
-        }
-
-        fun getFreeInput(): CharSequence? = displayItems.firstOrNull()?.freeInput
-
-        override fun toString(): String {
-            return "DisplayState(currentAmount: $currentAmount)"
-        }
-    }
-
-    data class LoadAndDisplayState(
-        val currentAmount: CurrencyAmount,
-        val exchangeTable: ExchangeTable,
-        val displayItems: List<CurrencyDisplayItem>,
-        val scrollToFirst: Boolean
-    ) : MainScreenState() {
-
-        fun toErrorAndDisplayState(error: MainScreenError): ErrorAndDisplayState {
-            return ErrorAndDisplayState(
-                currentAmount,
-                exchangeTable,
-                displayItems,
-                error,
-                false
+        fun toLoadingState(): DisplayState {
+            return copy(
+                scrollToFirst = false,
+                loading = true,
+                error = null
             )
         }
 
         fun toDisplayState(): DisplayState {
-            return DisplayState(
-                currentAmount,
-                exchangeTable,
-                displayItems,
-                false
+            return copy(
+                scrollToFirst = false,
+                loading = false,
+                error = null
             )
         }
 
         fun getFreeInput(): CharSequence? = displayItems.firstOrNull()?.freeInput
 
         override fun toString(): String {
-            return "LoadAndDisplayState(currentAmount: $currentAmount)"
+            return "DisplayState(currentAmount: $currentAmount; loading: $loading; error: $error)"
         }
     }
 
@@ -87,38 +57,13 @@ sealed class MainScreenState {
         }
     }
 
-    data class ErrorAndDisplayState(
-        val currentAmount: CurrencyAmount,
-        val exchangeTable: ExchangeTable,
-        val displayItems: List<CurrencyDisplayItem>,
-        val error: MainScreenError,
-        val scrollToFirst: Boolean
-    ) : MainScreenState() {
 
-        fun toLoadingAndDisplayState(): LoadAndDisplayState {
-            return LoadAndDisplayState(
-                currentAmount,
-                exchangeTable,
-                displayItems,
-                false
-            )
-        }
-
-        fun getFreeInput(): CharSequence? = displayItems.firstOrNull()?.freeInput
-
-        override fun toString(): String {
-            return "ErrorAndDisplayState(currentAmount: $currentAmount, error: $error)"
-        }
-    }
-
-    fun isErrorState(): Boolean = this is ErrorState || this is ErrorAndDisplayState
-    fun isLoadingState(): Boolean = this is LoadingState || this is LoadAndDisplayState
+    fun isErrorState(): Boolean = this is ErrorState || (this is DisplayState && error != null)
+    fun isLoadingState(): Boolean = this is LoadingState || (this is DisplayState && loading)
 
     fun getCurrentCurrency(): Currency? {
         return when (this) {
             is DisplayState -> currentAmount.currency
-            is LoadAndDisplayState -> currentAmount.currency
-            is ErrorAndDisplayState -> currentAmount.currency
             else -> null
         }
     }
@@ -126,8 +71,6 @@ sealed class MainScreenState {
     fun exchangeTable(): ExchangeTable? {
         return when (this) {
             is DisplayState -> exchangeTable
-            is LoadAndDisplayState -> exchangeTable
-            is ErrorAndDisplayState -> exchangeTable
             else -> null
         }
     }
