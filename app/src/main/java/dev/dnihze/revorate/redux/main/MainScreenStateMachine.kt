@@ -214,6 +214,7 @@ class MainScreenStateMachine @Inject constructor(
             }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun openNetworkSettingSideEffect(
         actions: Observable<MainScreenAction>,
         state: StateAccessor<MainScreenState>
