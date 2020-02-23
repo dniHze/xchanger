@@ -222,11 +222,9 @@ class MainScreenStateMachine @Inject constructor(
         return actions.ofType(MainScreenAction.NetworkSettings::class.java)
             .switchMap {
                 router.navigateTo(NetworkSettingsScreen())
-                Observable.timer(2L, TimeUnit.SECONDS)
-                    .map { MainScreenAction.Retry as MainScreenAction }
+                Observable.never<MainScreenAction>()
             }
     }
-
 
     private fun reducer(state: MainScreenState, action: MainScreenAction): MainScreenState {
         Timber.tag(tag).i("State: $state;\nAction: $action;")
