@@ -71,9 +71,10 @@ class MainScreenStateMachine @Inject constructor(
             .switchMap {
                 localDataSource.getLocalExchangeTable()
                     .subscribeOn(Schedulers.io())
+                    .filter { table -> !table.isEmpty() }
+                    .map { table -> MainScreenAction.LocalDBTableLoaded(table) as MainScreenAction }
+                    .onErrorResumeNext(Function { t -> Observable.just(MainScreenAction.Error(t)) })
             }
-            .filter { table -> !table.isEmpty() }
-            .map { table -> MainScreenAction.LocalDBTableLoaded(table) as MainScreenAction }
             .startWith(MainScreenAction.LoadNetworkTable)
     }
 
