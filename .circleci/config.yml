@@ -34,6 +34,7 @@ jobs:
           destination: reports
       - store_test_results:
           path: app/build/test-results
+      - run: touch ${HOME}/repo/keystore.jks
       - run: echo $ENCODED_KEYSTORE | base64 --decode >> ${HOME}/repo/keystore.jks
       - run: echo 'export KEYSTORE=${HOME}/repo/keystore.jks' >> $BASH_ENV
       - run:
