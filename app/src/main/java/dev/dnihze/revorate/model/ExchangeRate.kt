@@ -42,20 +42,29 @@ data class ExchangeRate(
      * `anotherRate` rate:  1 USD = 100 RUB
      * Produced rate:       1 RUB = 2 / 100 EUR -> 1 RUB = 0.02 EUR
      *
-     * If the base currency is different, than code throws IllegalArgumentException
-     * if
+     * If the base currency is different, than code throws IllegalArgumentException.
      */
     fun invertRateWithNewBase(anotherRate: ExchangeRate): ExchangeRate {
         assert(anotherRate.forCurrency == this.forCurrency) {
             """
-                Base currencies are different:
-                    * this:       $this,
-                    * anotherRate: $anotherRate
-            """.trimIndent()
+                |Base currencies are different:
+                |    * this:       $this,
+                |    * anotherRate: $anotherRate
+            """.trimMargin()
         }
 
-        return if (anotherRate == this) {
-            ExchangeRate(anotherRate.rate, anotherRate.ofCurrency, anotherRate.ofCurrency)
+        return if (anotherRate.ofCurrency == ofCurrency && anotherRate.forCurrency == forCurrency) {
+            if (anotherRate.rate == rate) {
+                ExchangeRate(1.0, anotherRate.ofCurrency, anotherRate.ofCurrency)
+            } else {
+                throw IllegalArgumentException(
+                    """
+                        |Exchange rates currencies are the same, while the exchange rate are different:
+                        |    * this:       $this,
+                        |    * anotherRate: $anotherRate
+                    """
+                )
+            }
         } else {
             ExchangeRate(
                 rate = this.rate / anotherRate.rate,

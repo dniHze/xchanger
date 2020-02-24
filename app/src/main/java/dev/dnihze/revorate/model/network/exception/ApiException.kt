@@ -20,6 +20,4 @@ class ApiException(
     fun isIOException() = this.cause is IOException
     fun isHttpException() = this.cause is HttpException
     fun isAPIException() = isHttpException() && this.httpErrorCode != HTTP_CODE_NONE
-
-    fun isUnexpectedException() = !isHttpException() && !isIOException()
 }
