@@ -61,6 +61,12 @@
       android:hint="@string/zero"
       android:imeOptions="actionDone"
       tools:text="1183.06" />
+
+    <View
+      android:id="@+id/dummy_click_view"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      />
   </FrameLayout>
 
 

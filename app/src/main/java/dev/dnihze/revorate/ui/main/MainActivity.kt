@@ -3,6 +3,7 @@ package dev.dnihze.revorate.ui.main
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DiffUtil
@@ -64,6 +65,10 @@ class MainActivity : AppCompatActivity() {
         navigatorHolder.removeNavigator()
     }
 
+    override fun onDestroy() {
+        hideKeyboard()
+        super.onDestroy()
+    }
 
     private fun bindViewModel() {
         viewModel = injectViewModel(viewModelFactory)
@@ -74,11 +79,14 @@ class MainActivity : AppCompatActivity() {
                 is MainScreenState.LoadingState -> {
                     viewBinding.progressView.show()
                     viewBinding.errorView.hide()
-
+                    viewBinding.recyclerView.isVisible = false
+                    hideKeyboard()
                     snackBarHelper.hide()
                 }
                 is MainScreenState.ErrorState -> {
                     viewBinding.progressView.hide()
+                    viewBinding.recyclerView.isVisible = false
+                    hideKeyboard()
 
                     when (val error = state.error) {
                         is MainScreenError.NetworkConnectionError -> {
@@ -116,6 +124,7 @@ class MainActivity : AppCompatActivity() {
                 is MainScreenState.DisplayState -> {
                     viewBinding.progressView.hide()
                     viewBinding.errorView.hide()
+                    viewBinding.recyclerView.isVisible = true
 
                     when (val error = state.error) {
                         is MainScreenError.NetworkConnectionError -> {

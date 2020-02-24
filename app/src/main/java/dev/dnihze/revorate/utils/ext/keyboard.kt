@@ -10,7 +10,7 @@ import timber.log.Timber
 fun EditText.showKeyboard() {
     this.requestFocus()
     try {
-        context.getSystemService<InputMethodManager>()?.showSoftInput(this, InputMethodManager.SHOW_FORCED)
+        context.getSystemService<InputMethodManager>()?.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
     } catch (t: Throwable) {
         Timber.e(t, "Error on showing keyboard on view.")
     }

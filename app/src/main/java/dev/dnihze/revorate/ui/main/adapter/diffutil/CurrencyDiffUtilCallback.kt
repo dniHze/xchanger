@@ -21,7 +21,7 @@ class CurrencyDiffUtilCallback(
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
         val old = oldList[oldItemPosition]
         val new = newList[newItemPosition]
-        return old.amount.amount == new.amount.amount &&
+        return old.displayAmount == new.displayAmount &&
                 old.amount.currency == new.amount.currency &&
                 old.inputEnabled == new.inputEnabled
     }
@@ -30,9 +30,14 @@ class CurrencyDiffUtilCallback(
         val old = oldList[oldItemPosition]
         val new = newList[newItemPosition]
 
-        return CurrencyDiffUtilPayload(
-            sumChanged = old.amount.amount != new.amount.amount,
-            inputEnabledChanged = old.inputEnabled != new.inputEnabled
-        ).takeIf { it.inputEnabledChanged || it.sumChanged }
+        val inputChanged = old.inputEnabled != new.inputEnabled
+        val bindSumChanged = old.displayAmount != new.displayAmount || (inputChanged && !new.inputEnabled)
+
+        return if (inputChanged || bindSumChanged) {
+            CurrencyDiffUtilPayload(
+                sumChanged = bindSumChanged,
+                inputEnabledChanged = inputChanged
+            )
+        } else null
     }
 }

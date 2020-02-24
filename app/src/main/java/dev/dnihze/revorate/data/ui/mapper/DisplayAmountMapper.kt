@@ -25,7 +25,7 @@ class DisplayAmountMapper @Inject constructor(): Mapper<CurrencyAmount, CharSequ
     private fun getPattern(amount: CurrencyAmount): String {
         val currency = amount.currency
         val digitsAfterSeparator = currency.digitsAfterSeparator.takeUnless {
-            amount.amount.toInt().toDouble() == amount.amount
+            amount.amount.toLong().toDouble() == amount.amount
         } ?: 0
 
         val pattern = patternCache[digitsAfterSeparator]

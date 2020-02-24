@@ -2,15 +2,17 @@ package dev.dnihze.revorate.ui.main.adapter
 
 import android.text.InputType
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatEditText
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import dev.dnihze.revorate.R
 import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
 import dev.dnihze.revorate.ui.main.adapter.binding.CurrencyListItemBinding
-import dev.dnihze.revorate.ui.main.delegate.AdapterActionsDelegate
 import dev.dnihze.revorate.ui.main.adapter.diffutil.CurrencyDiffUtilPayload
+import dev.dnihze.revorate.ui.main.delegate.AdapterActionsDelegate
 import dev.dnihze.revorate.utils.ext.showKeyboard
 
 class CurrencyHolder(
@@ -19,7 +21,7 @@ class CurrencyHolder(
     private val delegate: AdapterActionsDelegate
 ) : RecyclerView.ViewHolder(
     LayoutInflater.from(parent.context).inflate(R.layout.currency_list_item, parent, false)
-) {
+), View.OnClickListener {
 
     private val viewBinding = CurrencyListItemBinding(itemView)
 
@@ -29,17 +31,8 @@ class CurrencyHolder(
         }
 
     init {
-        itemView.setOnClickListener {
-            if (!isAdapterPositionValid()) return@setOnClickListener
-
-            if (!adapterData.inputEnabled) {
-                delegate.onNewCurrency(adapterData.amount)
-            } else {
-                itemView.post {
-                    viewBinding.input.showKeyboard()
-                }
-            }
-        }
+        itemView.setOnClickListener(this)
+        viewBinding.dummyClickView.setOnClickListener(this)
 
         viewBinding.input.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             if (!isAdapterPositionValid()) return@addTextChangedListener
@@ -50,6 +43,22 @@ class CurrencyHolder(
         })
     }
 
+    override fun onClick(v: View) {
+        if (!isAdapterPositionValid()) return
+        if (!adapterData.inputEnabled) {
+            delegate.onNewCurrency(adapterData.amount)
+        } else {
+            if (adapterData.inputEnabled) {
+                itemView.post {
+                    if (!viewBinding.input.hasFocus()) {
+                        viewBinding.input.setSelection(viewBinding.input.stringValue().length)
+                    }
+                    viewBinding.input.showKeyboard()
+                }
+            }
+        }
+    }
+
     fun bind() {
         val data = adapterData
         viewBinding.title.text = data.amount.currency.isoName
@@ -57,9 +66,8 @@ class CurrencyHolder(
         viewBinding.emoji.setText(data.currencyFlagEmojiId)
         viewBinding.subtitle.setText(data.currencyFullNameId)
 
+        bindInputState(data)
         bindSum(data)
-
-        viewBinding.input.isEnabled = data.inputEnabled
 
         if (data.amount.currency.digitsAfterSeparator != 0 && viewBinding.input.inputType != FLAG_DECIMAL_NUMBER) {
             viewBinding.input.inputType = FLAG_DECIMAL_NUMBER
@@ -77,7 +85,12 @@ class CurrencyHolder(
         if (payload != null) {
             val data = adapterData
 
+            if (payload.sumChanged) {
+                bindSum(data)
+            }
+
             if (payload.inputEnabledChanged) {
+                bindInputState(data)
                 viewBinding.input.isEnabled = data.inputEnabled
 
                 if (data.inputEnabled) {
@@ -86,21 +99,30 @@ class CurrencyHolder(
                     }
                 }
             }
+        }
+    }
 
-            if (payload.sumChanged) {
-                bindSum(data)
-            }
+    private fun bindInputState(data: CurrencyDisplayItem) {
+        if (data.inputEnabled) {
+            viewBinding.dummyClickView.isVisible = false
 
+            if (!viewBinding.input.isEnabled)
+                viewBinding.input.isEnabled = true
+
+            viewBinding.input.setSelection(viewBinding.input.stringValue().length)
+        } else {
+            viewBinding.dummyClickView.isVisible = true
+
+            if (viewBinding.input.isEnabled)
+                viewBinding.input.isEnabled = false
         }
     }
 
     private fun bindSum(data: CurrencyDisplayItem) {
         if (!data.inputEnabled) {
             viewBinding.input.setText(data.displayAmount)
-            viewBinding.input.setSelection(data.displayAmount.length)
         } else if (data.freeInput != null && data.freeInput != (viewBinding.input.stringValue())) {
             viewBinding.input.setText(data.freeInput)
-            viewBinding.input.setSelection(data.freeInput.length)
         }
     }
 

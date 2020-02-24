@@ -13,4 +13,5 @@ class CurrencyListItemBinding(
     val title: AppCompatTextView = parentView.findViewById(R.id.title)
     val subtitle: AppCompatTextView = parentView.findViewById(R.id.subtitle)
     val input: AppCompatEditText = parentView.findViewById(R.id.input)
+    val dummyClickView: View = parentView.findViewById(R.id.dummy_click_view)
 }
