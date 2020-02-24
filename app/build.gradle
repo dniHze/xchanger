@@ -97,6 +97,7 @@ dependencies {
     testImplementation TestDependencies.junit
     testImplementation TestDependencies.mockk
     testImplementation TestDependencies.room
+    testImplementation TestDependencies.mockOkHttpServer
 
     androidTestImplementation TestDependencies.androidxJunit
     androidTestImplementation TestDependencies.mockkAndroid

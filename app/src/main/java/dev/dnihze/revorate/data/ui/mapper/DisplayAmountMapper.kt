@@ -3,6 +3,7 @@ package dev.dnihze.revorate.data.ui.mapper
 import androidx.collection.SparseArrayCompat
 import dev.dnihze.revorate.utils.common.Mapper
 import dev.dnihze.revorate.model.CurrencyAmount
+import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.*
@@ -17,15 +18,15 @@ class DisplayAmountMapper @Inject constructor(): Mapper<CurrencyAmount, CharSequ
     override fun map(from: CurrencyAmount): CharSequence {
         val formatPattern = getPattern(from)
         val decimalFormat = NumberFormat.getNumberInstance(Locale.getDefault()) as DecimalFormat
+        decimalFormat.roundingMode = RoundingMode.DOWN
         decimalFormat.applyPattern(formatPattern)
         return decimalFormat.format(from.amount)
     }
 
-
     private fun getPattern(amount: CurrencyAmount): String {
         val currency = amount.currency
-        val digitsAfterSeparator = currency.digitsAfterSeparator.takeUnless {
-            amount.amount.toLong().toDouble() == amount.amount
+        val digitsAfterSeparator = currency.digitsAfterSeparator.takeUnless {count ->
+            count > 0 && amount.amount.toLong().toDouble() == amount.amount
         } ?: 0
 
         val pattern = patternCache[digitsAfterSeparator]

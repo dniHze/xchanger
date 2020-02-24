@@ -309,7 +309,7 @@ class MainScreenStateMachine @Inject constructor(
                             currentAmount = amount,
                             exchangeTable = table,
                             displayItems = mainScreenListFactory.create(
-                                table, amount, state.getFreeInput()
+                                table, amount, state
                             ),
                             scrollToFirst = false
                         )
@@ -349,7 +349,7 @@ class MainScreenStateMachine @Inject constructor(
                                 currentAmount = action.amount,
                                 exchangeTable = state.exchangeTable,
                                 displayItems = mainScreenListFactory.create(
-                                    state.exchangeTable, action.amount, state.getFreeInput()
+                                    state.exchangeTable, action.amount, state
                                 ),
                                 scrollToFirst = false
                             )

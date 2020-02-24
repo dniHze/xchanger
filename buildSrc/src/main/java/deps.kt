@@ -96,4 +96,5 @@ object TestDependencies {
     const val mockk = "io.mockk:mockk:${Versions.mockk}"
     const val mockkAndroid = "io.mockk:mockk-android:${Versions.mockk}"
     const val room = "androidx.room:room-testing:${Versions.room}"
+    const val mockOkHttpServer = "com.squareup.okhttp3:mockwebserver:${Versions.okHttp}"
 }

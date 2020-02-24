@@ -16,10 +16,6 @@ class CurrencyISOCodeMapper @Inject constructor(): Mapper<Int, Currency?> {
     }
 
     private fun getCurrencyForTag(isoCode: Int): Currency? {
-        assert(isoCode > 0) {
-            "Only positive ISO currency codes exists. Given code: $isoCode."
-        }
-
         val currency = Currency.values().find {
             it.isoCode == isoCode
         }

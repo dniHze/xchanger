@@ -16,11 +16,6 @@ class CurrencyISONameMapper @Inject constructor(): Mapper<String, Currency?> {
     }
 
     private fun getCurrencyForTag(isoName: String): Currency? {
-        assert(isoName.length == 3) {
-            "Only 3 characters long ISO currencies names are allowed. Given currency name: '${isoName}'. " +
-                    "Example of valid ISO currency name: 'UAH'."
-        }
-
         val currency = Currency.values().find {
             it.isoName.equals(isoName, ignoreCase = true)
         }

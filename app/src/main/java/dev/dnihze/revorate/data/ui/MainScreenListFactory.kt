@@ -6,6 +6,7 @@ import dev.dnihze.revorate.data.ui.mapper.DisplayCurrencyNameMapper
 import dev.dnihze.revorate.model.CurrencyAmount
 import dev.dnihze.revorate.model.ExchangeTable
 import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
+import dev.dnihze.revorate.redux.main.MainScreenState
 import javax.inject.Inject
 
 class MainScreenListFactory @Inject constructor(
@@ -17,14 +18,16 @@ class MainScreenListFactory @Inject constructor(
     fun create(
         table: ExchangeTable,
         amount: CurrencyAmount,
-        baseCurrencyFreeInputAmount: CharSequence?
+        previousDisplayState: MainScreenState.DisplayState?
     ): List<CurrencyDisplayItem> {
+        assert(table.isOrdered()) { "Table supposed to be ordered." }
+
         if (table.isEmpty()) {
             return emptyList()
         }
 
         val baseCurrency = table.baseCurrency
-        assert(baseCurrency == amount.currency)
+        assert(baseCurrency == amount.currency) { "Base currencies must be same" }
 
         val amountList = mutableListOf(amount)
 
@@ -35,7 +38,7 @@ class MainScreenListFactory @Inject constructor(
         return amountList.mapIndexed { index, currencyAmount ->
             val displayAmount = displayAmountMapper.map(currencyAmount)
             val freeInputAmount = if (currencyAmount.currency == baseCurrency) {
-                baseCurrencyFreeInputAmount ?: displayAmount
+                previousDisplayState?.getFreeInput() ?: displayAmount
             } else {
                 null
             }
