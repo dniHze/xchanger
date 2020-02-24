@@ -17,8 +17,8 @@ import dev.dnihze.revorate.redux.main.MainScreenAction
 import dev.dnihze.revorate.redux.main.MainScreenError
 import dev.dnihze.revorate.redux.main.MainScreenState
 import dev.dnihze.revorate.ui.main.adapter.CurrencyAdapter
-import dev.dnihze.revorate.ui.main.binding.MainActivityViewBinding
 import dev.dnihze.revorate.ui.main.adapter.diffutil.CurrencyDiffUtilCallback
+import dev.dnihze.revorate.ui.main.binding.MainActivityViewBinding
 import dev.dnihze.revorate.ui.main.navigation.ActivityNavigator
 import dev.dnihze.revorate.ui.main.util.SnackBarHelper
 import dev.dnihze.revorate.utils.ext.hideKeyboard
@@ -70,61 +70,63 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun bindViewModel() {
+    private fun bindViewModel() = with(viewBinding) {
         viewModel = injectViewModel(viewModelFactory)
         setupRecyclerView()
 
-        viewModel.state.observe(this, Observer { state ->
+        viewModel.state.observe(this@MainActivity, Observer { state ->
             when (state) {
                 is MainScreenState.LoadingState -> {
-                    viewBinding.progressView.show()
-                    viewBinding.errorView.hide()
-                    viewBinding.recyclerView.isVisible = false
-                    hideKeyboard()
+                    errorView.hide()
                     snackBarHelper.hide()
+                    recyclerView.isVisible = false
+                    hideKeyboard()
+
+                    progressView.show()
                 }
                 is MainScreenState.ErrorState -> {
-                    viewBinding.progressView.hide()
-                    viewBinding.recyclerView.isVisible = false
+                    progressView.hide()
+                    snackBarHelper.hide()
+                    recyclerView.isVisible = false
                     hideKeyboard()
 
                     when (val error = state.error) {
                         is MainScreenError.NetworkConnectionError -> {
-                            viewBinding.errorView.setNoNetworkConnection(View.OnClickListener {
+                            errorView.setNoNetworkConnection(View.OnClickListener {
                                 viewModel.input.accept(MainScreenAction.NetworkSettings)
                             })
                         }
                         is MainScreenError.ApiError -> {
                             val e = error.exception
                             when {
-                                e.isAPIException() -> viewBinding.errorView.setApiException(
+                                e.isAPIException() -> errorView.setApiException(
                                     e,
                                     View.OnClickListener {
                                         viewModel.input.accept(MainScreenAction.Retry)
                                     })
-                                e.isIOException() -> viewBinding.errorView.setNoNetworkConnection(View.OnClickListener {
+                                e.isIOException() -> errorView.setNoNetworkConnection(View.OnClickListener {
                                     viewModel.input.accept(MainScreenAction.NetworkSettings)
                                 })
-                                else -> viewBinding.errorView.setUnknown(e.cause, View.OnClickListener {
+                                else -> errorView.setUnknown(e.cause, View.OnClickListener {
                                     viewModel.input.accept(MainScreenAction.Retry)
                                 })
                             }
                         }
-                        is MainScreenError.Unknown -> viewBinding.errorView.setUnknown(
+                        is MainScreenError.Unknown -> errorView.setUnknown(
                             error.throwable,
                             View.OnClickListener {
+                                viewModel.input.accept(MainScreenAction.InitScreen)
                                 viewModel.input.accept(MainScreenAction.Retry)
                             })
                     }
 
-                    viewBinding.errorView.show()
-
-                    snackBarHelper.hide()
+                    errorView.show()
                 }
                 is MainScreenState.DisplayState -> {
-                    viewBinding.progressView.hide()
-                    viewBinding.errorView.hide()
-                    viewBinding.recyclerView.isVisible = true
+                    progressView.hide()
+                    errorView.hide()
+
+                    recyclerView.isVisible = true
 
                     when (val error = state.error) {
                         is MainScreenError.NetworkConnectionError -> {
@@ -151,7 +153,6 @@ class MainActivity : AppCompatActivity() {
                             viewModel.input.accept(MainScreenAction.Retry)
                         })
                         else -> snackBarHelper.hide()
-
                     }
 
                     setDataToAdapter(state.displayItems)
@@ -159,7 +160,6 @@ class MainActivity : AppCompatActivity() {
                     if (state.scrollToFirst) {
                         scrollToStart()
                     }
-
                 }
             }
         })
@@ -174,9 +174,12 @@ class MainActivity : AppCompatActivity() {
             adapter = currencyAdapter
             layoutManager = linearLayoutManager
             (itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
+
             setHasFixedSize(true)
-            val scrollThreshold = resources.getDimension(R.dimen.keyboard_dismiss_threshold)
+
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                private val scrollThreshold = resources.getDimension(R.dimen.keyboard_dismiss_threshold)
+
                 private var hasSeenFirstItem = true
                 private var cumulativeDY = 0
 

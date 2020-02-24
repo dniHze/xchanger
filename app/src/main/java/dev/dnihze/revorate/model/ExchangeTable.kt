@@ -5,17 +5,19 @@ import java.lang.NullPointerException
 
 interface ExchangeTable : Iterable<ExchangeRate> {
 
+    // Values
     val baseCurrency: Currency?
-
+    // Methods
     fun newTableFor(currency: Currency): ExchangeTable?
-    fun getValue(currency: Currency): ExchangeRate = get(currency)
-        ?: throw NullPointerException("No such currency exchange rate inside table.")
-
+    fun isEmpty(): Boolean
+    fun orderWith(other: ExchangeTable): ExchangeTable
+    // Operator methods
     operator fun get(currency: Currency): ExchangeRate?
     operator fun contains(currency: Currency): Boolean
-    fun isEmpty(): Boolean
 
+    // Default methods
     fun isOrdered() = this is OrderedExchangeTable
+
     fun order(): ExchangeTable {
         if (isOrdered()) {
             return this
@@ -23,5 +25,6 @@ interface ExchangeTable : Iterable<ExchangeRate> {
         return OrderedExchangeTable(sortedBy { it.forCurrency.isoName })
     }
 
-    fun orderWith(other: ExchangeTable): ExchangeTable
+    fun getValue(currency: Currency): ExchangeRate = get(currency)
+        ?: throw NullPointerException("No such currency exchange rate inside table.")
 }

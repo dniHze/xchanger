@@ -24,7 +24,6 @@ class CurrencyHolder(
 ), View.OnClickListener {
 
     private val viewBinding = CurrencyListItemBinding(itemView)
-
     private val adapterData: CurrencyDisplayItem
         get() {
             return dataAccessor(adapterPosition)
@@ -33,7 +32,6 @@ class CurrencyHolder(
     init {
         itemView.setOnClickListener(this)
         viewBinding.dummyClickView.setOnClickListener(this)
-
         viewBinding.input.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             if (!isAdapterPositionValid()) return@addTextChangedListener
             val data = adapterData
