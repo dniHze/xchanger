@@ -34,6 +34,7 @@ jobs:
           destination: reports
       - store_test_results:
           path: app/build/test-results
+      - run: chown -R $USER:$USER ${pwd}
       - run: echo $ENCODED_KEYSTORE | base64 --decode >> ${pwd}/keystore.jks
       - run: echo 'export KEYSTORE=${pwd}/keystore.jks' >> $BASH_ENV
       - run:
