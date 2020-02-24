@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <bool name="white_status_bar">false</bool>
-  <bool name="white_nav_bar">false</bool>
-</resources>
