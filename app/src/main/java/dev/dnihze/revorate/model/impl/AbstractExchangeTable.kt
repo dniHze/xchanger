@@ -4,7 +4,6 @@ import androidx.collection.SparseArrayCompat
 import dev.dnihze.revorate.model.Currency
 import dev.dnihze.revorate.model.ExchangeRate
 import dev.dnihze.revorate.model.ExchangeTable
-import java.math.BigDecimal
 
 abstract class AbstractExchangeTable : ExchangeTable {
 
@@ -12,7 +11,6 @@ abstract class AbstractExchangeTable : ExchangeTable {
         protected set
 
     protected val exchangeRateStorage = SparseArrayCompat<ExchangeRate>()
-
 
     override fun toString(): String {
         val ratesString = sortedBy { it.ofCurrency.isoName }
@@ -46,11 +44,23 @@ abstract class AbstractExchangeTable : ExchangeTable {
     override fun isEmpty(): Boolean = exchangeRateStorage.isEmpty
 
     override fun orderWith(other: ExchangeTable): ExchangeTable {
+        assert(other.isOrdered()) {
+            "Order table must be ordered"
+        }
+
+        if (isOrdered()) return this
+
+        if (isEmpty()) {
+            return OrderedExchangeTable(listOf())
+        }
+
+        if (other.isEmpty()) {
+            return OrderedExchangeTable(toList())
+        }
+
         assert(this.baseCurrency == other.baseCurrency) {
             "Base currencies should be same."
         }
-
-        if (this.isOrdered()) return this
 
         val orderMap = other.mapIndexed { index, exchangeRate -> exchangeRate.ofCurrency to index }
             .toMap()

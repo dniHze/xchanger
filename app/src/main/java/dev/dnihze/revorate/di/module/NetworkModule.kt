@@ -28,6 +28,7 @@ import javax.inject.Singleton
 abstract class NetworkModule {
 
     @Binds
+    @Singleton
     abstract fun bindConnectionWatcher(connectionWatcherImpl: ConnectionWatcherImpl): ConnectionWatcher
 
     companion object {

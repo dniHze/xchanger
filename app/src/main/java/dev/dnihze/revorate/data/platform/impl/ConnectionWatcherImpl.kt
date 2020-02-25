@@ -19,17 +19,19 @@ import dev.dnihze.revorate.model.platform.NetworkConnection
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * File is using deprecation suppression as the NetworkInfo is deprecated,
  * but there is no alternative on API < N
  */
+@Singleton
 class ConnectionWatcherImpl @Inject constructor(
     private val appContext: Context
 ) : ConnectionWatcher {
 
     override fun watch(): Observable<NetworkConnection> {
-        return Observable.create { emitter ->
+        return Observable.create<NetworkConnection> { emitter ->
             val connectivityManager = appContext.getSystemService<ConnectivityManager>()
             if (connectivityManager == null) {
                 emitter.onNext(NetworkConnection.UNAVAILABLE)
@@ -37,7 +39,7 @@ class ConnectionWatcherImpl @Inject constructor(
             } else {
                 createWatcher(connectivityManager, emitter)
             }
-        }
+        }.distinctUntilChanged().share()
     }
 
     private val createWatcher: (
