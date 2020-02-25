@@ -10,7 +10,6 @@ import dev.dnihze.revorate.utils.ext.applyEach
 import dev.dnihze.revorate.data.network.impl.ApiService
 import dev.dnihze.revorate.data.platform.ConnectionWatcher
 import dev.dnihze.revorate.data.platform.impl.ConnectionWatcherImpl
-import dev.dnihze.revorate.utils.moshi.BigDecimalAdapter
 import io.reactivex.schedulers.Schedulers
 import okhttp3.Call
 import okhttp3.Interceptor
@@ -46,7 +45,6 @@ abstract class NetworkModule {
         @Provides
         fun provideMoshi(): Moshi {
             return Moshi.Builder()
-                .add(BigDecimalAdapter)
                 .build()
         }
         @Provides
