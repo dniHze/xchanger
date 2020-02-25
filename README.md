@@ -1,5 +1,5 @@
 # XChanger
-[![CircleCI](https://circleci.com/gh/dniHze/xchanger.svg?style=svg)](https://app.circleci.com/github/dniHze/xchanger/pipelines)
+[![CircleCI](https://circleci.com/gh/dniHze/xchanger.svg?style=svg)](https://app.circleci.com/github/dniHze/xchanger/pipelines) [![APK](https://img.shields.io/badge/-Dpwnload%20APK-brightgreen)](https://github.com/dniHze/xchanger/releases)
 
 <img src="/art/icon.png" height="200" width="200">
 
@@ -23,6 +23,8 @@ Test assignment project for Revolut
 Could be solved with custom view but it will complex the support
 ## Links
 **Test task**: [Google Docs](https://docs.google.com/document/d/13Ecs3hhgZJJLsugNUwZPUn_9gsqzwH80Bb-1CRbauTQ/edit)<br/>
+## Download
+You could find the latest release and debug APKs on the "**Releases**" [page](https://github.com/dniHze/xchanger/releases).
 ## License
 ```
 Copyright 2020 Artyom Dorosh
