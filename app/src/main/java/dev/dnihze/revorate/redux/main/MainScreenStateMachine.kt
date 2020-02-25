@@ -50,8 +50,9 @@ class MainScreenStateMachine @Inject constructor(
             sideEffects = listOf(
                 ::networkLoadSideEffect,
                 ::requestDBUpdatesSideEffect,
-                ::initHeartBeatSideEffect,
                 ::initConnectionWatcherSideEffect,
+                ::firstRequestOnInitSideEffect,
+                ::initHeartBeatSideEffect,
                 ::connectivitySideEffect,
                 ::currencyChangedSideEffect,
                 ::retrySideEffect,
@@ -60,6 +61,7 @@ class MainScreenStateMachine @Inject constructor(
             )
         )
         .distinctUntilChanged()
+        .share()
 
 
     @Suppress("UNUSED_PARAMETER")
@@ -75,7 +77,16 @@ class MainScreenStateMachine @Inject constructor(
                     .map { table -> MainScreenAction.LocalDBTableLoaded(table) as MainScreenAction }
                     .onErrorResumeNext(Function { t -> Observable.just(MainScreenAction.Error(t)) })
             }
-            .startWith(MainScreenAction.LoadNetworkTable)
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun firstRequestOnInitSideEffect(
+        actions: Observable<MainScreenAction>,
+        state: StateAccessor<MainScreenState>
+    ): Observable<MainScreenAction> {
+        return actions.ofType(MainScreenAction.InitScreen::class.java)
+            .filter { !state().isErrorState() }
+            .map { MainScreenAction.LoadNetworkTable as MainScreenAction }
     }
 
     private fun initHeartBeatSideEffect(
@@ -88,7 +99,7 @@ class MainScreenStateMachine @Inject constructor(
             }
             .switchMap { appState ->
                 if (appState == AppState.FOREGROUND) {
-                    Observable.interval(1L, 1L, TimeUnit.SECONDS)
+                    Observable.interval(0L, 1L, TimeUnit.SECONDS)
                         .subscribeOn(Schedulers.computation())
                         .filter {
                             val currentState = state()
@@ -235,7 +246,7 @@ class MainScreenStateMachine @Inject constructor(
             // Loading
             is MainScreenState.LoadingState -> {
                 when (action) {
-                    is MainScreenAction.LoadNetworkTable -> {
+                    is MainScreenAction.NetworkTableLoaded -> {
                         state.copy(loaded = true)
                     }
                     is MainScreenAction.LocalDBTableLoaded -> {
@@ -274,6 +285,25 @@ class MainScreenStateMachine @Inject constructor(
             is MainScreenState.ErrorState -> {
                 when (action) {
                     is MainScreenAction.Retry -> MainScreenState.LoadingState()
+                    is MainScreenAction.LocalDBTableLoaded -> {
+                        val table = action.exchangeTable.order()
+                        val currency = table.baseCurrency
+                        if (currency != null) {
+                            val amount = CurrencyAmount(1.0, currency)
+                            MainScreenState.DisplayState(
+                                currentAmount = amount,
+                                exchangeTable = table,
+                                displayItems = mainScreenListFactory.create(
+                                    table, amount, null
+                                ),
+                                scrollToFirst = false,
+                                loading = false,
+                                error = state.error
+                            )
+                        } else {
+                            state
+                        }
+                    }
                     is MainScreenAction.ConnectivityChanged -> {
                         if (!action.connection.isAvailable()) {
                             MainScreenState.ErrorState(MainScreenError.NetworkConnectionError)

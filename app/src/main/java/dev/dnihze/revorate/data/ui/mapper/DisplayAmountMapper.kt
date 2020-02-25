@@ -17,7 +17,7 @@ class DisplayAmountMapper @Inject constructor(): Mapper<CurrencyAmount, CharSequ
 
     override fun map(from: CurrencyAmount): CharSequence {
         val formatPattern = getPattern(from)
-        val decimalFormat = NumberFormat.getNumberInstance(Locale.getDefault()) as DecimalFormat
+        val decimalFormat = NumberFormat.getNumberInstance(Locale.US) as DecimalFormat
         decimalFormat.roundingMode = RoundingMode.DOWN
         decimalFormat.applyPattern(formatPattern)
         return decimalFormat.format(from.amount)
