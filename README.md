@@ -1,6 +1,8 @@
 # XChanger
 [![CircleCI](https://circleci.com/gh/dniHze/xchanger.svg?style=svg)](https://app.circleci.com/github/dniHze/xchanger/pipelines)
-![XChanger](/art/icon.png?raw=true "XChanger logo")
+
+<img src="/art/icon.png" height="200" width="200">
+
 Test assignment project for Revolut
 ## About
 **Architecture**: MVI / MVVM<br/>
