@@ -39,7 +39,7 @@ class MainViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        disposables.dispose()
+        disposables.clear()
     }
 
     override fun onNewInput(input: String, previousAmount: CurrencyAmount) {

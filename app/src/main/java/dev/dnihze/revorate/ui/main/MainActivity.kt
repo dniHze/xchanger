@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity() {
 
     private val navigator by lazy(LazyThreadSafetyMode.NONE) { ActivityNavigator(this) }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         App.appComponentProvider().getAppComponent().inject(this)
@@ -70,97 +69,15 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun bindViewModel() = with(viewBinding) {
+    private fun bindViewModel() {
         viewModel = injectViewModel(viewModelFactory)
         setupRecyclerView()
 
         viewModel.state.observe(this@MainActivity, Observer { state ->
             when (state) {
-                is MainScreenState.LoadingState -> {
-                    errorView.hide()
-                    snackBarHelper.hide()
-                    recyclerView.isVisible = false
-                    hideKeyboard()
-
-                    progressView.show()
-                }
-                is MainScreenState.ErrorState -> {
-                    progressView.hide()
-                    snackBarHelper.hide()
-                    recyclerView.isVisible = false
-                    hideKeyboard()
-
-                    when (val error = state.error) {
-                        is MainScreenError.NetworkConnectionError -> {
-                            errorView.setNoNetworkConnection(View.OnClickListener {
-                                viewModel.input.accept(MainScreenAction.NetworkSettings)
-                            })
-                        }
-                        is MainScreenError.ApiError -> {
-                            val e = error.exception
-                            when {
-                                e.isAPIException() -> errorView.setApiException(
-                                    e,
-                                    View.OnClickListener {
-                                        viewModel.input.accept(MainScreenAction.Retry)
-                                    })
-                                e.isIOException() -> errorView.setNoNetworkConnection(View.OnClickListener {
-                                    viewModel.input.accept(MainScreenAction.NetworkSettings)
-                                })
-                                else -> errorView.setUnknown(e.cause, View.OnClickListener {
-                                    viewModel.input.accept(MainScreenAction.Retry)
-                                })
-                            }
-                        }
-                        is MainScreenError.Unknown -> errorView.setUnknown(
-                            error.throwable,
-                            View.OnClickListener {
-                                viewModel.input.accept(MainScreenAction.InitScreen)
-                                viewModel.input.accept(MainScreenAction.Retry)
-                            })
-                    }
-
-                    errorView.show()
-                }
-                is MainScreenState.DisplayState -> {
-                    progressView.hide()
-                    errorView.hide()
-
-                    recyclerView.isVisible = true
-
-                    when (val error = state.error) {
-                        is MainScreenError.NetworkConnectionError -> {
-                            snackBarHelper.setNoNetworkConnection(View.OnClickListener {
-                                viewModel.input.accept(MainScreenAction.NetworkSettings)
-                            })
-                        }
-                        is MainScreenError.ApiError -> {
-                            val e = error.exception
-                            when {
-                                e.isAPIException() -> snackBarHelper.setApiException(e, View.OnClickListener {
-                                    viewModel.input.accept(MainScreenAction.Retry)
-
-                                })
-                                e.isIOException() -> snackBarHelper.setNoNetworkConnection(View.OnClickListener {
-                                    viewModel.input.accept(MainScreenAction.NetworkSettings)
-                                })
-                                else -> snackBarHelper.setUnknownError(View.OnClickListener {
-                                    viewModel.input.accept(MainScreenAction.Retry)
-                                })
-                            }
-                        }
-                        is MainScreenError.Unknown -> snackBarHelper.setUnknownError(View.OnClickListener {
-                            viewModel.input.accept(MainScreenAction.Retry)
-                        })
-                        else -> snackBarHelper.hide()
-                    }
-
-                    setDataToAdapter(state.displayItems)
-
-                    if (state.scrollToFirst) {
-                        scrollToStart()
-                    }
-                }
+                is MainScreenState.LoadingState -> renderLoadingView()
+                is MainScreenState.ErrorState -> renderErrorState(state)
+                is MainScreenState.DisplayState -> renderDisplayState(state)
             }
         })
 
@@ -197,6 +114,97 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             })
+        }
+    }
+
+    private fun renderLoadingView() = with(viewBinding) {
+        errorView.hide()
+        snackBarHelper.hide()
+        recyclerView.isVisible = false
+        hideKeyboard()
+
+        progressView.show()
+    }
+
+    private fun renderErrorState(state: MainScreenState.ErrorState) = with(viewBinding) {
+        progressView.hide()
+        snackBarHelper.hide()
+        recyclerView.isVisible = false
+        hideKeyboard()
+
+        when (val error = state.error) {
+            is MainScreenError.NetworkConnectionError -> {
+                errorView.setNoNetworkConnection(View.OnClickListener {
+                    viewModel.input.accept(MainScreenAction.NetworkSettings)
+                })
+            }
+            is MainScreenError.ApiError -> {
+                val e = error.exception
+                when {
+                    e.isAPIException() -> errorView.setApiException(
+                        e,
+                        View.OnClickListener {
+                            viewModel.input.accept(MainScreenAction.Retry)
+                        })
+                    e.isIOException() -> errorView.setNoNetworkConnection(View.OnClickListener {
+                        viewModel.input.accept(MainScreenAction.NetworkSettings)
+                    })
+                    else -> errorView.setUnknown(e.cause, View.OnClickListener {
+                        viewModel.input.accept(MainScreenAction.Retry)
+                    })
+                }
+            }
+            is MainScreenError.Unknown -> errorView.setUnknown(
+                error.throwable,
+                View.OnClickListener {
+                    viewModel.input.accept(MainScreenAction.InitScreen)
+                    viewModel.input.accept(MainScreenAction.Retry)
+                })
+        }
+
+        errorView.show()
+    }
+
+    private fun renderDisplayState(state: MainScreenState.DisplayState) = with(viewBinding) {
+        progressView.hide()
+        errorView.hide()
+
+        recyclerView.isVisible = true
+
+        when (val error = state.error) {
+            is MainScreenError.NetworkConnectionError -> {
+                snackBarHelper.setNoNetworkConnection(View.OnClickListener {
+                    viewModel.input.accept(MainScreenAction.NetworkSettings)
+                })
+            }
+
+            is MainScreenError.ApiError -> {
+                val e = error.exception
+                when {
+                    e.isAPIException() -> snackBarHelper.setApiException(e, View.OnClickListener {
+                        viewModel.input.accept(MainScreenAction.Retry)
+
+                    })
+                    e.isIOException() -> snackBarHelper.setNoNetworkConnection(View.OnClickListener {
+                        viewModel.input.accept(MainScreenAction.NetworkSettings)
+                    })
+                    else -> snackBarHelper.setUnknownError(View.OnClickListener {
+                        viewModel.input.accept(MainScreenAction.Retry)
+                    })
+                }
+            }
+
+            is MainScreenError.Unknown -> snackBarHelper.setUnknownError(View.OnClickListener {
+                viewModel.input.accept(MainScreenAction.Retry)
+            })
+
+            else -> snackBarHelper.hide()
+        }
+
+        setDataToAdapter(state.displayItems)
+
+        if (state.scrollToFirst) {
+            scrollToStart()
         }
     }
 

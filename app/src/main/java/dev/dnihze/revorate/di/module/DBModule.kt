@@ -9,10 +9,12 @@ import javax.inject.Singleton
 
 @Module
 object DBModule {
+
+    private const val DATABASE_NAME = "app_database"
     @Provides
     @Singleton
     fun provideAppDB(appContext: Context): AppDB {
-        return Room.databaseBuilder(appContext, AppDB::class.java, "app_database")
+        return Room.databaseBuilder(appContext, AppDB::class.java, DATABASE_NAME)
             .build()
     }
 }

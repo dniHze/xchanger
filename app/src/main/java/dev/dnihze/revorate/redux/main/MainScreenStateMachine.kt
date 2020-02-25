@@ -368,8 +368,10 @@ class MainScreenStateMachine @Inject constructor(
                         val error = action.throwable.toError()
                         if (error is MainScreenError.Unknown) {
                             MainScreenState.ErrorState(error)
-                        } else {
+                        } else if (!state.isErrorState()) {
                             state.toErrorState(action.throwable.toError())
+                        } else {
+                            state
                         }
                     }
                     is MainScreenAction.NewAmount -> {

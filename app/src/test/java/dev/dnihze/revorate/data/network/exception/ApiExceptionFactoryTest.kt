@@ -36,7 +36,7 @@ class ApiExceptionFactoryTest {
         val moshi = NetworkModule.provideMoshi()
         val moshiConverterFactory = NetworkModule.provideMoshiConverterFactory(moshi)
         val callAdapterFactory = NetworkModule.provideRxJavaCallAdapterFactory()
-        val okHttpClient = NetworkModule.provideClient(10L, 10L, 10L, emptyList(), emptyList())
+        val okHttpClient = NetworkModule.provideClient(3L, 3L, 3L, emptyList(), emptyList())
 
         apiService = Retrofit.Builder()
             .baseUrl(mockWebServer.url("/"))

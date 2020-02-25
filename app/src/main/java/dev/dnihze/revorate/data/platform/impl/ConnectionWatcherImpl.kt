@@ -75,6 +75,11 @@ class ConnectionWatcherImpl @Inject constructor(
                 emitter.onNext(NetworkConnection.LOST)
             }
         }
+
+        val info = connectivityManager.activeNetworkInfo
+        val active = info?.getNetworkConnection() ?: NetworkConnection.UNAVAILABLE
+        emitter.onNext(active)
+
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
 
         emitter.setCancellable {
@@ -99,6 +104,10 @@ class ConnectionWatcherImpl @Inject constructor(
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+
+        val info = connectivityManager.activeNetworkInfo
+        val active = info?.getNetworkConnection() ?: NetworkConnection.UNAVAILABLE
+        emitter.onNext(active)
 
         appContext.registerReceiver(receiver, filter)
 
