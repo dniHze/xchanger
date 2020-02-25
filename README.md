@@ -1,5 +1,4 @@
-[![CircleCI](https://circleci.com/gh/dniHze/revolut-test-assignment.svg?style=svg&circle-token=05cd8fe4e3269f9094d78c0ae567a231d0330f3f)](https://circleci.com)
-
+[![CircleCI](https://circleci.com/gh/dniHze/xchanger.svg?style=svg)](https://app.circleci.com/github/dniHze/xchanger/pipelines)
 # XChanger
 Test assignment project for Revolut
 ## About
