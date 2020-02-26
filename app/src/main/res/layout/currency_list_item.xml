@@ -50,7 +50,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <androidx.appcompat.widget.AppCompatEditText
+    <dev.dnihze.revorate.ui.main.widget.SteadyEditText
       android:id="@+id/input"
       style="@style/TextStyle.EditField"
       android:layout_width="wrap_content"
