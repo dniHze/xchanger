@@ -1,5 +1,5 @@
 # XChanger
-[![CircleCI](https://circleci.com/gh/dniHze/xchanger.svg?style=svg)](https://app.circleci.com/github/dniHze/xchanger/pipelines) [![APK](https://img.shields.io/badge/-Dpwnload%20APK-brightgreen)](https://github.com/dniHze/xchanger/releases)
+[![CircleCI](https://circleci.com/gh/dniHze/xchanger.svg?style=svg)](https://app.circleci.com/github/dniHze/xchanger/pipelines) [![APK](https://img.shields.io/badge/-Download%20APK-brightgreen)](https://github.com/dniHze/xchanger/releases)
 
 <img src="/art/icon.png" height="200" width="200">
 
