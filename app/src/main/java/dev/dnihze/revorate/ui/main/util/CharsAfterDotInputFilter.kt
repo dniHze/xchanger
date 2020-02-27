@@ -78,11 +78,11 @@ class CharsAfterDotInputFilter: InputFilter, Switchable {
         val vacantPlaces = max(2 - (dend - 1 - destDotIndex), 0)
         if (vacantPlaces == 0) return ""
 
-        val subsequence = source.subSequence(start, min(start + vacantPlaces + 1, end))
+        val subsequence = source.subSequence(start, min(start + vacantPlaces, end))
 
         if (subsequence.isEmpty()) return subsequence
 
-        if (subsequence.length == 1 && subsequence[0] == DOT) return ""
+        if (subsequence.length == 1 && subsequence[0] == DOT) return "."
         if (subsequence.length == 1) return subsequence
 
         if (subsequence[0] == DOT) return ""
