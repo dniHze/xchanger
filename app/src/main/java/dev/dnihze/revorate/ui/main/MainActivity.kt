@@ -43,8 +43,6 @@ class MainActivity : AppCompatActivity() {
 
     private val navigator by lazy(LazyThreadSafetyMode.NONE) { ActivityNavigator(this) }
 
-    // State management helpers
-    private var lastKnownDisplayStateError: MainScreenError? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,7 +122,6 @@ class MainActivity : AppCompatActivity() {
         errorView.hide()
         snackBarHelper.hide()
         recyclerView.isVisible = false
-        lastKnownDisplayStateError = null
         hideKeyboard()
 
         progressView.show()
@@ -134,7 +131,6 @@ class MainActivity : AppCompatActivity() {
         progressView.hide()
         snackBarHelper.hide()
         recyclerView.isVisible = false
-        lastKnownDisplayStateError = null
         hideKeyboard()
 
         when (val error = state.error) {
@@ -176,9 +172,9 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.isVisible = true
 
-        when (val error = state.error) {
+        when (val error = state.error?.error) {
             is MainScreenError.NetworkConnectionError -> {
-                if (error != lastKnownDisplayStateError || !snackBarHelper.isShown()) {
+                if (!state.error.isKnowIssue || !snackBarHelper.isShown()) {
                     snackBarHelper.setNoNetworkConnection(View.OnClickListener {
                         viewModel.input.accept(MainScreenAction.NetworkSettings)
                     })
@@ -186,7 +182,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             is MainScreenError.ApiError -> {
-                if (error != lastKnownDisplayStateError || !snackBarHelper.isShown()) {
+                if (!state.error.isKnowIssue || !snackBarHelper.isShown()) {
                     snackBarHelper.setUnknownError(View.OnClickListener {
                         viewModel.input.accept(MainScreenAction.Retry)
                     })
@@ -207,7 +203,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             is MainScreenError.Unknown -> {
-                if (error != lastKnownDisplayStateError || !snackBarHelper.isShown()) {
+                if (!state.error.isKnowIssue || !snackBarHelper.isShown()) {
                     snackBarHelper.setUnknownError(View.OnClickListener {
                         viewModel.input.accept(MainScreenAction.Retry)
                     })
@@ -216,8 +212,6 @@ class MainActivity : AppCompatActivity() {
 
             else -> snackBarHelper.hide()
         }
-
-        lastKnownDisplayStateError = state.error
 
         setDataToAdapter(state.displayItems)
 

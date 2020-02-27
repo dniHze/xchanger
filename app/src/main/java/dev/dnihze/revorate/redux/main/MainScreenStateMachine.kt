@@ -298,7 +298,7 @@ class MainScreenStateMachine @Inject constructor(
                                 ),
                                 scrollToFirst = false,
                                 loading = false,
-                                error = state.error
+                                error = ErrorHolder(state.error)
                             )
                         } else {
                             state
@@ -341,7 +341,8 @@ class MainScreenStateMachine @Inject constructor(
                             displayItems = mainScreenListFactory.create(
                                 table, amount, state
                             ),
-                            scrollToFirst = false
+                            scrollToFirst = false,
+                            error = state.dropDownErrorState()
                         )
                     }
                     is MainScreenAction.Retry -> state.toLoadingState()
@@ -356,7 +357,8 @@ class MainScreenStateMachine @Inject constructor(
                                         currencyDisplayItem
                                     }
                                 },
-                                scrollToFirst = false
+                                scrollToFirst = false,
+                                error = state.dropDownErrorState()
                             )
                         } else {
                             state
@@ -383,7 +385,8 @@ class MainScreenStateMachine @Inject constructor(
                                 displayItems = mainScreenListFactory.create(
                                     state.exchangeTable, action.amount, state
                                 ),
-                                scrollToFirst = false
+                                scrollToFirst = false,
+                                error = state.dropDownErrorState()
                             )
                         } else {
                             val table = state.exchangeTable.newTableFor(action.amount.currency)
@@ -398,7 +401,8 @@ class MainScreenStateMachine @Inject constructor(
                                 displayItems = mainScreenListFactory.create(
                                     table, action.amount, null
                                 ),
-                                scrollToFirst = true
+                                scrollToFirst = true,
+                                error = state.dropDownErrorState()
                             )
                         }
                     }

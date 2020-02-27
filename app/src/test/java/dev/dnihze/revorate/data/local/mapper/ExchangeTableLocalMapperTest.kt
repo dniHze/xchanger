@@ -65,6 +65,6 @@ class ExchangeTableLocalMapperTest {
         val cad = ExchangeRateDBEntity(null,
             Currency.EUR.isoCode, "1.6548000000", Currency.CAD.isoCode, 1)
 
-        val table = mapper.map(listOf(usd, cad))
+        mapper.map(listOf(usd, cad))
     }
 }

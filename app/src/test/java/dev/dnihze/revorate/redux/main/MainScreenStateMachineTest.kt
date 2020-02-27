@@ -363,7 +363,7 @@ class MainScreenStateMachineTest {
         third as MainScreenState.DisplayState
         assertFalse(third.loading)
         assertNotNull(third.error)
-        assertTrue(third.error is MainScreenError.NetworkConnectionError)
+        assertTrue(third.error?.error is MainScreenError.NetworkConnectionError)
 
         verify(exactly = 0) { networkDataSource.getExchangeTable(any()) }
     }
@@ -406,7 +406,7 @@ class MainScreenStateMachineTest {
 
 
         val third = values[2]
-        assertTrue(third is MainScreenState.DisplayState && third.error is MainScreenError.ApiError)
+        assertTrue(third is MainScreenState.DisplayState && third.error?.error is MainScreenError.ApiError)
     }
 
     @After

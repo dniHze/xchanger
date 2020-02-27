@@ -15,15 +15,24 @@ sealed class MainScreenState {
         val displayItems: List<CurrencyDisplayItem>,
         val scrollToFirst: Boolean,
         val loading: Boolean,
-        val error: MainScreenError?
+        val error: ErrorHolder?
     ) : MainScreenState() {
 
         fun toErrorState(error: MainScreenError): DisplayState {
-            return copy(
-                scrollToFirst = false,
-                loading = false,
-                error = error
-            )
+            val currentError = this.error?.error
+            return if (error != currentError) {
+                copy(
+                    scrollToFirst = false,
+                    loading = false,
+                    error = ErrorHolder(error)
+                )
+            } else {
+                copy(
+                    scrollToFirst = false,
+                    loading = false,
+                    error = dropDownErrorState()
+                )
+            }
         }
 
         fun toLoadingState(): DisplayState {
@@ -40,6 +49,10 @@ sealed class MainScreenState {
                 loading = false,
                 error = null
             )
+        }
+
+        fun dropDownErrorState(): ErrorHolder? {
+            return error?.copy(isKnowIssue = true)
         }
 
         fun getFreeInput(): CharSequence? = displayItems.firstOrNull()?.freeInput
