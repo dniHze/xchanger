@@ -21,6 +21,7 @@ class ZeroInputFilter: InputFilter, Switchable {
         val shouldFilter = end > start && ( (dstart == 0 && dend == destString.length) ||
                     (dstart == dend && dend == 1 && destString[0] == DOT))
         if (!shouldFilter) return null
+
         return filterZeros(destString.isEmpty(), source, start, end)
     }
 

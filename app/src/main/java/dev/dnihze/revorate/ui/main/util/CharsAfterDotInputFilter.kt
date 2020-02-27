@@ -44,7 +44,6 @@ class CharsAfterDotInputFilter: InputFilter, Switchable {
     private fun filterInputWithoutDest(source: CharSequence, start: Int, end: Int): CharSequence? {
         var dotIndex = -1
 
-
         for (i in start until end) {
             if (source[i] == DOT) {
                 dotIndex = i
@@ -93,7 +92,6 @@ class CharsAfterDotInputFilter: InputFilter, Switchable {
     }
 
     companion object {
-        const val DOT = '.'
+        private const val DOT = '.'
     }
-
 }
