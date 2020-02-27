@@ -4,11 +4,11 @@ import retrofit2.HttpException
 import java.io.IOException
 import java.lang.RuntimeException
 
-class ApiException(
+data class ApiException(
     val httpErrorCode: Int = HTTP_CODE_NONE,
     val body: String? = null,
-    message: String,
-    cause: Throwable
+    override val message: String,
+    override val cause: Throwable
 ): RuntimeException(
     message,
     cause

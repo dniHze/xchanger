@@ -46,4 +46,6 @@ class SnackBarHelper(
             snackBar = null
         }
     }
+
+    fun isShown() = snackBar?.isShown == true
 }
