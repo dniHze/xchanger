@@ -15,6 +15,7 @@ private object Versions {
     const val rxJava2 = "2.2.17"
     const val rxAndroid2 = "2.1.1"
     const val dagger2 = "2.26"
+    const val assistedInject = "0.5.2"
     const val moshi = "1.9.2"
     const val room = "2.2.3"
     const val rxRedux = "1.0.1"
@@ -47,6 +48,7 @@ object Dependencies {
     const val recyclerView = "androidx.recyclerview:recyclerview:${Versions.recyclerView}"
 
     const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.lifecycle}"
+    const val viewModelSavedState = "androidx.lifecycle:lifecycle-viewmodel-savedstate:${Versions.lifecycle}"
     const val liveData = "androidx.lifecycle:lifecycle-livedata-ktx:${Versions.lifecycle}"
     const val lifecycleProcess = "androidx.lifecycle:lifecycle-process:${Versions.lifecycle}"
     const val lifecycleCompiler  = "androidx.lifecycle:lifecycle-compiler:${Versions.lifecycle}"

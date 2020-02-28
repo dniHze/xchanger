@@ -71,6 +71,7 @@ dependencies {
 
     implementation Dependencies.liveData
     implementation Dependencies.viewModel
+    implementation Dependencies.viewModelSavedState
 
     implementation Dependencies.lifecycleProcess
     kapt Dependencies.lifecycleCompiler
