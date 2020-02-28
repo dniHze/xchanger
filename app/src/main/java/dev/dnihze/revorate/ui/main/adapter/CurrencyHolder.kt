@@ -13,8 +13,8 @@ import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
 import dev.dnihze.revorate.ui.main.adapter.binding.CurrencyListItemBinding
 import dev.dnihze.revorate.ui.main.adapter.diffutil.CurrencyDiffUtilPayload
 import dev.dnihze.revorate.ui.main.delegate.AdapterActionsDelegate
-import dev.dnihze.revorate.ui.main.util.CharsAfterDotInputFilter
-import dev.dnihze.revorate.ui.main.util.ZeroInputFilter
+import dev.dnihze.revorate.ui.main.filter.CharsAfterDotInputFilter
+import dev.dnihze.revorate.ui.main.filter.ZeroInputFilter
 import dev.dnihze.revorate.utils.ext.showKeyboard
 
 class CurrencyHolder(
@@ -25,10 +25,12 @@ class CurrencyHolder(
     LayoutInflater.from(parent.context).inflate(R.layout.currency_list_item, parent, false)
 ), View.OnClickListener {
 
-
+    // View binding
     private val viewBinding = CurrencyListItemBinding(itemView)
+    // Filters
     private val zeroInputFilter = ZeroInputFilter()
     private val afterDotInputFilter = CharsAfterDotInputFilter()
+    // Data accessor
     private val adapterData: CurrencyDisplayItem
         get() {
             return dataAccessor(adapterPosition)
@@ -37,7 +39,7 @@ class CurrencyHolder(
     init {
         itemView.setOnClickListener(this)
         viewBinding.dummyClickView.setOnClickListener(this)
-        viewBinding.input.filters = viewBinding.input.filters + afterDotInputFilter + zeroInputFilter
+        viewBinding.input.filters = viewBinding.input.filters + zeroInputFilter + afterDotInputFilter
 
         viewBinding.input.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             if (!isAdapterPositionValid()) return@addTextChangedListener

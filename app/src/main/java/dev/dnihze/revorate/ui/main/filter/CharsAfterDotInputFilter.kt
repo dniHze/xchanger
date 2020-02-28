@@ -1,7 +1,8 @@
-package dev.dnihze.revorate.ui.main.util
+package dev.dnihze.revorate.ui.main.filter
 
 import android.text.InputFilter
 import android.text.Spanned
+import dev.dnihze.revorate.ui.main.util.Switchable
 import kotlin.math.max
 import kotlin.math.min
 
@@ -82,7 +83,7 @@ class CharsAfterDotInputFilter: InputFilter, Switchable {
 
         if (subsequence.isEmpty()) return subsequence
 
-        if (subsequence.length == 1 && subsequence[0] == DOT) return "."
+        if (subsequence.length == 1 && subsequence[0] == DOT) return ""
         if (subsequence.length == 1) return subsequence
 
         if (subsequence[0] == DOT) return ""
