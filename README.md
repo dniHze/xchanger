@@ -17,7 +17,8 @@ Test assignment project for Revolut
 * Screen rotation (but not process death)
 ## Issues to solve
 * ~~No proper input filters for sum entered by user. Currently you allowed to type `00000123.4567`~~.
-Test version that adds proper input behavior but restricts cursor movement could be found in `currency-input-tweaks` [branch](https://github.com/dniHze/xchanger/tree/currency-input-tweaks).
+Added "proper" input support to master branch. The implementation locking your cursor,
+but give you the full advantage over numeric input representation.
 * No support for entered sum on process death 
 (could be added with SavedStateHandle to ViewModel and StateMachine init logic update)
 * RecyclerView layout time takes long on adapter update (due to `wrap_content` EditText, probably). 
