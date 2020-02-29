@@ -7,7 +7,12 @@ import dev.dnihze.revorate.model.ui.main.CurrencyDisplayItem
 
 sealed class MainScreenState {
 
-    data class LoadingState(val loaded: Boolean = false) : MainScreenState()
+    data class LoadingState(
+        val loaded: Boolean = false,
+        val restoreFreeInput: CharSequence?
+    ) : MainScreenState() {
+        override fun getFreeInput() = restoreFreeInput
+    }
 
     data class DisplayState(
         val currentAmount: CurrencyAmount,
@@ -55,7 +60,7 @@ sealed class MainScreenState {
             return error?.copy(isKnowIssue = true)
         }
 
-        fun getFreeInput(): CharSequence? = displayItems.firstOrNull()?.freeInput
+        override fun getFreeInput(): CharSequence? = displayItems.firstOrNull()?.freeInput
 
         override fun toString(): String {
             return "DisplayState(currentAmount: $currentAmount; loading: $loading; error: $error)"
@@ -63,11 +68,14 @@ sealed class MainScreenState {
     }
 
     data class ErrorState(
-        var error: MainScreenError
+        var error: MainScreenError,
+        val restoreFreeInput: CharSequence?
     ) : MainScreenState() {
         override fun toString(): String {
             return "ErrorState(error: $error)"
         }
+
+        override fun getFreeInput() = restoreFreeInput
     }
 
 
@@ -87,4 +95,6 @@ sealed class MainScreenState {
             else -> null
         }
     }
+
+    abstract fun getFreeInput(): CharSequence?
 }

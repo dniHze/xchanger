@@ -22,14 +22,13 @@ import dev.dnihze.revorate.ui.main.navigation.ActivityNavigator
 import dev.dnihze.revorate.ui.main.util.SnackBarHelper
 import dev.dnihze.revorate.utils.ext.hideKeyboard
 import dev.dnihze.revorate.utils.ext.injectViewModel
-import dev.dnihze.revorate.utils.viewmodel.ViewModelAbstractFactory
 import ru.terrakok.cicerone.NavigatorHolder
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var viewModelAbstractFactory: ViewModelAbstractFactory
+    lateinit var viewModelAbstractFactory: MainViewModel.Factory
     @Inject
     lateinit var navigatorHolder: NavigatorHolder
 

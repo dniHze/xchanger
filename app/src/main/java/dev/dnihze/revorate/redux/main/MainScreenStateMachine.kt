@@ -45,7 +45,7 @@ class MainScreenStateMachine @Inject constructor(
             Timber.tag(tag).i("New input action -> $it")
         }
         .reduxStore(
-            initialState = MainScreenState.LoadingState(),
+            initialState = MainScreenState.LoadingState(restoreFreeInput = null),
             reducer = ::reducer,
             sideEffects = listOf(
                 ::networkLoadSideEffect,
@@ -128,7 +128,11 @@ class MainScreenStateMachine @Inject constructor(
                     .distinctUntilChanged()
                     .doOnNext { Timber.tag(tag).i("New connection status -> $it") }
                     .subscribeOn(Schedulers.computation())
-                    .map { networkConnection -> MainScreenAction.ConnectivityChanged(networkConnection) }
+                    .map { networkConnection ->
+                        MainScreenAction.ConnectivityChanged(
+                            networkConnection
+                        )
+                    }
             }
     }
 
@@ -197,7 +201,7 @@ class MainScreenStateMachine @Inject constructor(
                             }
                         })
                     }
-                    .onErrorResumeNext(Function { t -> Maybe.just(MainScreenAction.Error(t))})
+                    .onErrorResumeNext(Function { t -> Maybe.just(MainScreenAction.Error(t)) })
             }
     }
 
@@ -246,6 +250,11 @@ class MainScreenStateMachine @Inject constructor(
             // Loading
             is MainScreenState.LoadingState -> {
                 when (action) {
+                    is MainScreenAction.RestoreInput -> {
+                        state.copy(
+                            restoreFreeInput = action.freeInput
+                        )
+                    }
                     is MainScreenAction.NetworkTableLoaded -> {
                         state.copy(loaded = true)
                     }
@@ -253,12 +262,14 @@ class MainScreenStateMachine @Inject constructor(
                         val table = action.exchangeTable.order()
                         val currency = table.baseCurrency
                         if (currency != null) {
-                            val amount = CurrencyAmount(1.0, currency)
+                            val freeInput = state.restoreFreeInput?.toString()
+                            val doubleAmount = freeInput?.toDoubleOrNull() ?: 1.0
+                            val amount = CurrencyAmount(doubleAmount, currency)
                             MainScreenState.DisplayState(
                                 currentAmount = amount,
                                 exchangeTable = table,
                                 displayItems = mainScreenListFactory.create(
-                                    table, amount, null
+                                    table, amount, state
                                 ),
                                 scrollToFirst = false,
                                 loading = !state.loaded,
@@ -269,13 +280,17 @@ class MainScreenStateMachine @Inject constructor(
                         }
                     }
                     is MainScreenAction.Error -> MainScreenState.ErrorState(
-                        action.throwable.toError()
+                        action.throwable.toError(),
+                        restoreFreeInput = state.restoreFreeInput
                     )
                     is MainScreenAction.ConnectivityChanged -> {
                         if (action.connection.isAvailable()) {
                             state
                         } else {
-                            MainScreenState.ErrorState(MainScreenError.NetworkConnectionError)
+                            MainScreenState.ErrorState(
+                                MainScreenError.NetworkConnectionError,
+                                restoreFreeInput = state.restoreFreeInput
+                            )
                         }
                     }
                     else -> state
@@ -284,17 +299,24 @@ class MainScreenStateMachine @Inject constructor(
             // Error
             is MainScreenState.ErrorState -> {
                 when (action) {
-                    is MainScreenAction.Retry -> MainScreenState.LoadingState()
+                    is MainScreenAction.RestoreInput -> state.copy(
+                        restoreFreeInput = action.freeInput
+                    )
+                    is MainScreenAction.Retry -> MainScreenState.LoadingState(
+                        restoreFreeInput = state.restoreFreeInput
+                    )
                     is MainScreenAction.LocalDBTableLoaded -> {
                         val table = action.exchangeTable.order()
                         val currency = table.baseCurrency
                         if (currency != null) {
-                            val amount = CurrencyAmount(1.0, currency)
+                            val freeInput = state.restoreFreeInput?.toString()
+                            val doubleAmount = freeInput?.toDoubleOrNull() ?: 1.0
+                            val amount = CurrencyAmount(doubleAmount, currency)
                             MainScreenState.DisplayState(
                                 currentAmount = amount,
                                 exchangeTable = table,
                                 displayItems = mainScreenListFactory.create(
-                                    table, amount, null
+                                    table, amount, state
                                 ),
                                 scrollToFirst = false,
                                 loading = false,
@@ -306,7 +328,10 @@ class MainScreenStateMachine @Inject constructor(
                     }
                     is MainScreenAction.ConnectivityChanged -> {
                         if (!action.connection.isAvailable()) {
-                            MainScreenState.ErrorState(MainScreenError.NetworkConnectionError)
+                            MainScreenState.ErrorState(
+                                MainScreenError.NetworkConnectionError,
+                                restoreFreeInput = state.restoreFreeInput
+                            )
                         } else {
                             state
                         }
@@ -348,7 +373,8 @@ class MainScreenStateMachine @Inject constructor(
                     is MainScreenAction.Retry -> state.toLoadingState()
                     is MainScreenAction.NewInput -> {
                         if (state.getFreeInput() != action.input &&
-                            state.currentAmount.currency == action.previousAmount.currency) {
+                            state.currentAmount.currency == action.previousAmount.currency
+                        ) {
                             state.copy(
                                 displayItems = state.displayItems.mapIndexed { index, currencyDisplayItem ->
                                     if (index == 0) {
@@ -369,7 +395,7 @@ class MainScreenStateMachine @Inject constructor(
                     is MainScreenAction.Error -> {
                         val error = action.throwable.toError()
                         if (error is MainScreenError.Unknown) {
-                            MainScreenState.ErrorState(error)
+                            MainScreenState.ErrorState(error, state.getFreeInput())
                         } else if (!state.isErrorState()) {
                             state.toErrorState(action.throwable.toError())
                         } else {
