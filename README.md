@@ -19,8 +19,7 @@ Test assignment project for Revolut
 * ~~No proper input filters for sum entered by user. Currently you allowed to type `00000123.4567`~~.
 Added "proper" input support to master branch. The implementation locking your cursor,
 but give you the full advantage over numeric input representation.
-* No support for entered sum on process death 
-(could be added with SavedStateHandle to ViewModel and StateMachine init logic update)
+* ~~No support for entered sum on process death ~~. Fixed in `0.1.6`.
 * RecyclerView layout time takes long on adapter update (due to `wrap_content` EditText, probably). 
 Could be solved with custom view but it will complex the support
 ## Links
