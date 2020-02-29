@@ -18,7 +18,7 @@ class MainScreenListFactory @Inject constructor(
     fun create(
         table: ExchangeTable,
         amount: CurrencyAmount,
-        previousDisplayState: MainScreenState.DisplayState?
+        previousState: MainScreenState?
     ): List<CurrencyDisplayItem> {
         assert(table.isOrdered()) { "Table supposed to be ordered." }
 
@@ -38,7 +38,7 @@ class MainScreenListFactory @Inject constructor(
         return amountList.mapIndexed { index, currencyAmount ->
             val displayAmount = displayAmountMapper.map(currencyAmount)
             val freeInputAmount = if (currencyAmount.currency == baseCurrency) {
-                previousDisplayState?.getFreeInput() ?: displayAmount
+                previousState?.getFreeInput() ?: displayAmount
             } else {
                 null
             }

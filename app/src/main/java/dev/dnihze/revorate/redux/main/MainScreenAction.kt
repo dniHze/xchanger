@@ -28,4 +28,6 @@ sealed class MainScreenAction {
     object Retry : MainScreenAction()
 
     object NetworkSettings: MainScreenAction()
+
+    data class RestoreInput(val freeInput: CharSequence) : MainScreenAction()
 }

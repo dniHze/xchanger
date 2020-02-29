@@ -5,7 +5,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,7 +28,7 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+    lateinit var viewModelAbstractFactory: MainViewModel.Factory
     @Inject
     lateinit var navigatorHolder: NavigatorHolder
 
@@ -71,7 +70,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun bindViewModel() {
-        viewModel = injectViewModel(viewModelFactory)
+        val factory = viewModelAbstractFactory.create(this, null)
+        viewModel = injectViewModel(factory)
         setupRecyclerView()
 
         viewModel.state.observe(this@MainActivity, Observer { state ->
