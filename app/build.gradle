@@ -59,18 +59,33 @@ kapt {
 dependencies {
     implementation Dependencies.kotlinStdLib
 
-    implementation Dependencies.appCompat
+    implementation (Dependencies.appCompat) {
+        exclude group: 'androidx.cursoradapter', module: 'cursoradapter'
+        exclude group: 'androidx.fragment', module: 'fragment'
+        exclude group: 'androidx.drawerlayout', module: 'drawerlayout'
+    }
     implementation Dependencies.ktxCore
 
     implementation Dependencies.emoji
     implementation Dependencies.emojiCompat
 
-    implementation Dependencies.material
+    implementation (Dependencies.material) {
+        exclude group: 'androidx.fragment', module: 'fragment'
+        exclude group: 'androidx.transition', module: 'transition'
+        exclude group: 'androidx.viewpager2', module: 'viewpager2'
+    }
 
     implementation Dependencies.recyclerView
 
-    implementation Dependencies.liveData
-    implementation Dependencies.viewModel
+    implementation (Dependencies.liveData)  {
+        exclude group: 'org.jetbrains.kotlinx', module: 'kotlinx-coroutines-core'
+        exclude group: 'org.jetbrains.kotlinx', module: 'kotlinx-coroutines-android'
+    }
+    implementation (Dependencies.viewModel) {
+        exclude group: 'org.jetbrains.kotlinx', module: 'kotlinx-coroutines-core'
+        exclude group: 'org.jetbrains.kotlinx', module: 'kotlinx-coroutines-android'
+    }
+
     implementation Dependencies.viewModelSavedState
 
     implementation Dependencies.lifecycleProcess
@@ -82,7 +97,9 @@ dependencies {
     api Dependencies.dagger2
     kapt Dependencies.dagger2Compiler
 
-    implementation Dependencies.moshiKotlin
+    implementation (Dependencies.moshiKotlin) {
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-reflect'
+    }
     kapt Dependencies.moshiCodegen
 
     implementation Dependencies.retrofit
